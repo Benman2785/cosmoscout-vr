@@ -50,3 +50,4 @@
 # ignore files created by cmake-gui on Windows
 CMakeCache.txt
 CMakeFiles
+/.vs
