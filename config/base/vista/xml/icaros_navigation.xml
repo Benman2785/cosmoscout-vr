@@ -95,7 +95,7 @@ This data flow net graph defines the interaction configuration for the ICAROS de
         <node name="speed_level" type="Add[float]"/>
 
         <node name="observer_speed" type="ConstantValue[float]">
-            <param name="value" value="-0.01"/>
+            <param name="value" value="-5.0"/>
         </node>
 
         <node name="clamp_high" type="Min[float]"/>
