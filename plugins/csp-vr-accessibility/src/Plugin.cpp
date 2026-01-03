@@ -15,6 +15,7 @@
 #include "../../../src/cs-core/SolarSystem.hpp"
 #include "../../../src/cs-utils/logger.hpp"
 #include "../../../src/cs-utils/utils.hpp"
+#include "Crosshair.hpp"
 #include "FloorGrid.hpp"
 #include "FovVignette.hpp"
 #include "logger.hpp"
@@ -37,6 +38,29 @@ namespace csp::vraccessibility {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// CROSSHAIR
+    void from_json(nlohmann::json const& j, Plugin::Settings::Crosshair& o) {
+  cs::core::Settings::deserialize(j, "enabled", o.mEnabled);
+  cs::core::Settings::deserialize(j, "size", o.mSize);
+  cs::core::Settings::deserialize(j, "offset", o.mOffset);
+  cs::core::Settings::deserialize(j, "extent", o.mExtent);
+  cs::core::Settings::deserialize(j, "texture", o.mTexture);
+  cs::core::Settings::deserialize(j, "alpha", o.mAlpha);
+  cs::core::Settings::deserialize(j, "color", o.mColor);
+}
+
+void to_json(nlohmann::json& j, Plugin::Settings::Crosshair const& o) {
+  cs::core::Settings::serialize(j, "enabled", o.mEnabled);
+  cs::core::Settings::serialize(j, "size", o.mSize);
+  cs::core::Settings::serialize(j, "offset", o.mOffset);
+  cs::core::Settings::serialize(j, "extent", o.mExtent);
+  cs::core::Settings::serialize(j, "texture", o.mTexture);
+  cs::core::Settings::serialize(j, "alpha", o.mAlpha);
+  cs::core::Settings::serialize(j, "color", o.mColor);
+}
+
+// GRID
+
 void from_json(nlohmann::json const& j, Plugin::Settings::Grid& o) {
   cs::core::Settings::deserialize(j, "enabled", o.mEnabled);
   cs::core::Settings::deserialize(j, "size", o.mSize);
@@ -56,6 +80,8 @@ void to_json(nlohmann::json& j, Plugin::Settings::Grid const& o) {
   cs::core::Settings::serialize(j, "alpha", o.mAlpha);
   cs::core::Settings::serialize(j, "color", o.mColor);
 }
+
+// VIGNETTE
 
 void from_json(nlohmann::json const& j, Plugin::Settings::Vignette& o) {
   cs::core::Settings::deserialize(j, "enabled", o.mEnabled);
@@ -84,11 +110,13 @@ void to_json(nlohmann::json& j, Plugin::Settings::Vignette const& o) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void from_json(nlohmann::json const& j, Plugin::Settings& o) {
+  cs::core::Settings::deserialize(j, "crosshair", o.mCrosshairSettings);
   cs::core::Settings::deserialize(j, "grid", o.mGridSettings);
   cs::core::Settings::deserialize(j, "vignette", o.mVignetteSettings);
 }
 
 void to_json(nlohmann::json& j, Plugin::Settings const& o) {
+  cs::core::Settings::serialize(j, "crosshair", o.mCrosshairSettings);
   cs::core::Settings::serialize(j, "grid", o.mGridSettings);
   cs::core::Settings::serialize(j, "vignette", o.mVignetteSettings);
 }
@@ -106,6 +134,50 @@ void Plugin::init() {
   mGuiManager->addSettingsSectionToSideBarFromHTML("VR Accessibility", "accessibility_new",
       "../share/resources/gui/vr_accessibility_settings.html");
   mGuiManager->executeJavascriptFile("../share/resources/gui/js/csp-vr-accessibility.js");
+
+  // === CROSSHAIR ===
+
+  // register callback for crosshair enable crosshair checkbox
+  mGuiManager->getGui()->registerCallback("crosshair.setEnabled",
+      "Enables or disables rendering the crosshair.",
+      std::function([this](bool enable) { mPluginSettings->mCrosshairSettings.mEnabled = enable; }));
+  mPluginSettings->mCrosshairSettings.mEnabled.connectAndTouch(
+      [this](bool enable) { mGuiManager->setCheckboxValue("crosshair.setEnabled", enable); });
+
+  // register callback for crosshair size slider
+  mGuiManager->getGui()->registerCallback("crosshair.setSize",
+      "Value scales the crosshair texture size.", std::function([this](double value) {
+        mPluginSettings->mCrosshairSettings.mSize = static_cast<float>(value);
+      }));
+  mPluginSettings->mCrosshairSettings.mSize.connectAndTouch(
+      [this](float value) { mGuiManager->setSliderValue("crosshair.setSize", value); });
+
+  // register callback for crosshair extent slider
+  mGuiManager->getGui()->registerCallback(
+      "crosshair.setExtent", "Value to scale the entire crosshair.", std::function([this](double value) {
+        mPluginSettings->mCrosshairSettings.mExtent = static_cast<float>(value);
+      }));
+  mPluginSettings->mCrosshairSettings.mExtent.connectAndTouch(
+      [this](float value) { mGuiManager->setSliderValue("crosshair.setExtent", value); });
+
+  // register callback for crosshair alpha slider
+  mGuiManager->getGui()->registerCallback(
+      "crosshair.setAlpha", "Value to adjust crosshair opacity.", std::function([this](double value) {
+        mPluginSettings->mCrosshairSettings.mAlpha = static_cast<float>(value);
+      }));
+  mPluginSettings->mCrosshairSettings.mAlpha.connectAndTouch(
+      [this](float value) { mGuiManager->setSliderValue("crosshair.setAlpha", value); });
+
+  // register callback for crosshair color picker
+  mGuiManager->getGui()->registerCallback("crosshair.setColor",
+      "Value to adjust color of the crosshair.", std::function([this](std::string value) {
+        mPluginSettings->mCrosshairSettings.mColor = static_cast<std::string>(value);
+      }));
+  mPluginSettings->mCrosshairSettings.mColor.connectAndTouch([this](std::string value) {
+    mGuiManager->getGui()->callJavascript("CosmoScout.crosshair.setColorValue", value);
+  });
+
+  // === GRID ===
 
   // register callback for grid enable grid checkbox
   mGuiManager->getGui()->registerCallback("floorGrid.setEnabled",
@@ -146,6 +218,8 @@ void Plugin::init() {
   mPluginSettings->mGridSettings.mColor.connectAndTouch([this](std::string value) {
     mGuiManager->getGui()->callJavascript("CosmoScout.floorGrid.setColorValue", value);
   });
+
+  // === VIGNETTE ===
 
   // register callback for fov vignette enable checkbox
   mGuiManager->getGui()->registerCallback("fovVignette.setEnabled",
@@ -243,10 +317,16 @@ void Plugin::deInit() {
   // remove settings tab
   mGuiManager->removeSettingsSection("VR Accessibility");
 
+  mGuiManager->getGui()->callJavascript("CosmoScout.removeApi", "crosshair");
   mGuiManager->getGui()->callJavascript("CosmoScout.removeApi", "floorGrid");
   mGuiManager->getGui()->callJavascript("CosmoScout.removeApi", "fovVignette");
 
   // remove callbacks
+  mGuiManager->getGui()->unregisterCallback("crosshair.setEnabled");
+  mGuiManager->getGui()->unregisterCallback("crosshair.setSize");
+  mGuiManager->getGui()->unregisterCallback("crosshair.setExtent");
+  mGuiManager->getGui()->unregisterCallback("crosshair.setAlpha");
+  mGuiManager->getGui()->unregisterCallback("crosshair.setColor");
   mGuiManager->getGui()->unregisterCallback("floorGrid.setEnabled");
   mGuiManager->getGui()->unregisterCallback("floorGrid.setSize");
   mGuiManager->getGui()->unregisterCallback("floorGrid.setExtent");
@@ -275,6 +355,9 @@ void Plugin::update() {
   if (resetColorPicker) {
     // reread settings from json
     from_json(mAllSettings->mPlugins.at("csp-vr-accessibility"), *mPluginSettings);
+    // reset crosshair color into picker
+    mGuiManager->getGui()->callJavascript(
+        "CosmoScout.crosshair.setColorValue", mPluginSettings->mCrosshairSettings.mColor.get());
     // reset grid color into picker
     mGuiManager->getGui()->callJavascript(
         "CosmoScout.floorGrid.setColorValue", mPluginSettings->mGridSettings.mColor.get());
@@ -283,6 +366,10 @@ void Plugin::update() {
         "CosmoScout.fovVignette.setColorValue", mPluginSettings->mVignetteSettings.mColor.get());
     // clear flag
     resetColorPicker = false;
+  }
+
+  if (mPluginSettings->mCrosshairSettings.mEnabled.get()) {
+    mCrosshair->update();
   }
 
   if (mPluginSettings->mGridSettings.mEnabled.get()) {
@@ -304,6 +391,9 @@ void Plugin::onLoad() {
   // Read settings from JSON.
   from_json(mAllSettings->mPlugins.at("csp-vr-accessibility"), *mPluginSettings);
 
+  // Create & configure Crosshair
+  mCrosshair = std::make_shared<Crosshair>(mSolarSystem, mPluginSettings->mCrosshairSettings);
+  mCrosshair->configure(mPluginSettings->mCrosshairSettings);
   // Create & configure FloorGrid
   mGrid = std::make_shared<FloorGrid>(mSolarSystem, mPluginSettings->mGridSettings);
   mGrid->configure(mPluginSettings->mGridSettings);

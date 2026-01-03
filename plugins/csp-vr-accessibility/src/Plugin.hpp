@@ -14,6 +14,7 @@
 
 namespace csp::vraccessibility {
 
+class Crosshair;
 class FloorGrid;
 class FovVignette;
 
@@ -23,6 +24,30 @@ class FovVignette;
 class Plugin : public cs::core::PluginBase {
  public:
   struct Settings {
+    struct Crosshair {
+      /// Toggle, whether the crosshair is hidden (false) or visible (true).
+      cs::utils::DefaultProperty<bool> mEnabled{true};
+
+      /// The scale of the crosshair texture.
+      cs::utils::DefaultProperty<float> mSize{0.5F};
+
+      /// The offset to adjust the crosshair from the observer.
+      cs::utils::DefaultProperty<float> mOffset{-1.8F};
+
+      /// The size of the crosshair.
+      cs::utils::DefaultProperty<float> mExtent{10.0F};
+
+      /// The texture used for the crosshair (b/w texture).
+      cs::utils::DefaultProperty<std::string> mTexture{
+          "../share/resources/textures/CrosshairLarge.png"};
+
+      /// The opacity of the crosshair (default: 1, fully opaque, to 0, fully transparent).
+      cs::utils::DefaultProperty<float> mAlpha{1.0F};
+
+      /// The color of the crosshair.
+      cs::utils::DefaultProperty<std::string> mColor{"#FFFFFF"};
+    };
+
     struct Grid {
       /// Toggle, whether the grid is hidden (false) or visible (true).
       cs::utils::DefaultProperty<bool> mEnabled{true};
@@ -78,6 +103,9 @@ class Plugin : public cs::core::PluginBase {
       cs::utils::DefaultProperty<bool> mUseVerticalOnly{false};
     };
 
+    /// The container for the Crosshair Settings
+    Plugin::Settings::Crosshair mCrosshairSettings;
+
     /// The container for the Grid Settings
     Plugin::Settings::Grid mGridSettings;
 
@@ -96,6 +124,7 @@ class Plugin : public cs::core::PluginBase {
   void onLoad();
 
   std::shared_ptr<Settings>    mPluginSettings = std::make_shared<Settings>();
+  std::shared_ptr<Crosshair>   mCrosshair;
   std::shared_ptr<FloorGrid>   mGrid;
   std::shared_ptr<FovVignette> mVignette;
 

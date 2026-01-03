@@ -10,6 +10,7 @@
 
 #include "../cs-utils/AnimatedValue.hpp"
 #include "CelestialAnchor.hpp"
+#include "CelestialObject.hpp"
 
 namespace cs::scene {
 
@@ -51,11 +52,38 @@ class CS_SCENE_EXPORT CelestialObserver : public CelestialAnchor {
   /// @return true, if the observer is currently being moved.
   bool isAnimationInProgress() const;
 
+  /// @return Direction, the observer is currently moving in
+  glm::dvec3 getVelocityDirection() const;
+
+  /// @return Speed, the observer is currently moving by
+  double getVelocityMagnitude() const;
+
+  // @return The closest Planet (CelestialObject) to the current Observer position
+  std::shared_ptr<const CelestialObject> getClosestPlanetToObserver() const;
+
+  /// @return the Vector3 from the closest Planet to the Observer
+  glm::dvec3 getClosestPlanetToObserverPosition() const;
+
+  void setClosestPlanetToObserver(
+      std::shared_ptr<const CelestialObject> closestPlanet, glm::dvec3 const& planetToObserverPos);
+
+  /// Setter for direction and speed, the observer is currently moving to/by
+  void setVelocity(glm::dvec3 const& direction, double magnitude);
+
  protected:
   utils::AnimatedValue<glm::dvec3> mAnimatedPosition;
   utils::AnimatedValue<glm::dquat> mAnimatedRotation;
+  bool                             mAnimationInProgress = false;
 
-  bool mAnimationInProgress = false;
+  /// Information on where the Observer is moving to
+  glm::dvec3 mVelocityDirection{0.0};
+  /// Information on how fast the Observer is moving
+  double mVelocityMagnitude{0.0};
+  /// Planet, closest to the Observer
+  std::shared_ptr<const CelestialObject> mClosestObject;
+  /// Position of the observer relative to the closestObject
+  glm::dvec3 mClosestPlanetToObserverPosition{0.0};
+
 };
 } // namespace cs::scene
 

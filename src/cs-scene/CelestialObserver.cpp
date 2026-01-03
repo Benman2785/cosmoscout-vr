@@ -121,4 +121,49 @@ bool CelestialObserver::isAnimationInProgress() const {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+glm::dvec3 CelestialObserver::getVelocityDirection() const {
+  return mVelocityDirection;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+double CelestialObserver::getVelocityMagnitude() const {
+  return mVelocityMagnitude;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+std::shared_ptr<const CelestialObject> CelestialObserver::getClosestPlanetToObserver() const {
+  return mClosestObject;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+glm::dvec3 CelestialObserver::getClosestPlanetToObserverPosition() const {
+  return mClosestPlanetToObserverPosition;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//TODO use mSolarSystem->pActiveObject.get() instead? check references
+void CelestialObserver::setClosestPlanetToObserver(
+    std::shared_ptr<const CelestialObject> closestPlanet, glm::dvec3 const& planetToObserverPos) {
+  mClosestObject = closestPlanet;
+  mClosestPlanetToObserverPosition = planetToObserverPos;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  void CelestialObserver::setVelocity(glm::dvec3 const& direction, double magnitude) {
+  if (!std::isfinite(magnitude) || glm::length(direction) < 1e-9) {
+    mVelocityDirection = glm::dvec3(0.0);
+    mVelocityMagnitude = 0.0;
+    return;
+  }
+  mVelocityDirection = glm::normalize(direction);
+  mVelocityMagnitude = magnitude;
+}
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+
 } // namespace cs::scene

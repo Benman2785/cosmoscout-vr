@@ -289,8 +289,14 @@ void SolarSystem::update() {
   if (duration > 0) {
     if (!mSpiceFrameChangedLastFrame) {
       double const secToNano = 1.0e9;
-      pCurrentObserverSpeed =
-          static_cast<float>(secToNano * glm::length(mLastPosition - observerPosition) / duration);
+      // delta in traveling direction
+      glm::dvec3 delta      = observerPosition - mLastPosition;
+      pCurrentObserverSpeed = static_cast<float>(secToNano * glm::length(delta) / duration);
+
+      // Save speed and direction in observer, for other classes to read
+      // normalized delta is direction
+      glm::dvec3 direction = glm::length(delta) > 0.0 ? glm::normalize(delta) : glm::dvec3(0.0);
+      mObserver.setVelocity(direction, static_cast<double>(pCurrentObserverSpeed.get()));
     }
     mLastPosition = observerPosition;
     mLastTime     = now;
