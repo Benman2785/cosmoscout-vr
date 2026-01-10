@@ -14,6 +14,7 @@
 
 namespace csp::vraccessibility {
 
+class VirtualHorizon;
 class Crosshair;
 class FloorGrid;
 class FovVignette;
@@ -24,6 +25,41 @@ class FovVignette;
 class Plugin : public cs::core::PluginBase {
  public:
   struct Settings {
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct VirtualHorizon {
+      /// Toggle, whether the virtualHorizon is hidden (false) or visible (true).
+      cs::utils::DefaultProperty<bool> mEnabled{true};
+
+      /// The scale of the virtualHorizon texture.
+      cs::utils::DefaultProperty<float> mSize{0.5F};
+
+      /// The height offset to adjust the virtualHorizon to the floor.
+      cs::utils::DefaultProperty<float> mOffset{-1.8F};
+
+      /// The size of the virtualHorizon.
+      cs::utils::DefaultProperty<float> mExtent{10.0F};
+
+      /// The texture used for the virtualHorizon (b/w texture).
+      cs::utils::DefaultProperty<std::string> mTexture{
+          "../share/resources/textures/virtualHorizonLarge.png"};
+
+      /// The opacity of the virtualHorizon (default: 1, fully opaque, to 0, fully transparent).
+      cs::utils::DefaultProperty<float> mAlpha{1.0F};
+
+      /// The color of the virtualHorizon.
+      cs::utils::DefaultProperty<std::string> mColor{"#FFFFFF"};
+
+      /// The Vector3 Direction, the Observer is moving in.
+      cs::utils::DefaultProperty<glm::vec3> mObserverDir{glm::vec3(0.0F, 0.0F, 0.0F)};
+
+      /// The Vector3 Normal of the nearest Planet to the Observer.
+      cs::utils::DefaultProperty<glm::vec3> mPlanetUp{glm::vec3(0.0F, 1.0F, 0.0F)};
+    };
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     struct Crosshair {
       /// Toggle, whether the crosshair is hidden (false) or visible (true).
       cs::utils::DefaultProperty<bool> mEnabled{true};
@@ -31,7 +67,7 @@ class Plugin : public cs::core::PluginBase {
       /// The scale of the crosshair texture.
       cs::utils::DefaultProperty<float> mSize{0.5F};
 
-      /// The offset to adjust the crosshair from the observer.
+      /// The offset to adjust the crosshair away from the observer.
       cs::utils::DefaultProperty<float> mOffset{-1.8F};
 
       /// The size of the crosshair.
@@ -48,6 +84,8 @@ class Plugin : public cs::core::PluginBase {
       cs::utils::DefaultProperty<std::string> mColor{"#FFFFFF"};
     };
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     struct Grid {
       /// Toggle, whether the grid is hidden (false) or visible (true).
       cs::utils::DefaultProperty<bool> mEnabled{true};
@@ -63,7 +101,7 @@ class Plugin : public cs::core::PluginBase {
 
       /// The texture used for the grid (b/w texture).
       cs::utils::DefaultProperty<std::string> mTexture{
-          "../share/resources/textures/gridCentered.png"};
+          "../share/resources/textures/gridCrossLarge.png"};
 
       /// The opacity of the grid (default: 1, fully opaque, to 0, fully transparent).
       cs::utils::DefaultProperty<float> mAlpha{1.0F};
@@ -71,6 +109,8 @@ class Plugin : public cs::core::PluginBase {
       /// The color of the grid.
       cs::utils::DefaultProperty<std::string> mColor{"#FFFFFF"};
     };
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct Vignette {
       /// Toggle, whether the FoV Vignette is used or not.
@@ -103,6 +143,11 @@ class Plugin : public cs::core::PluginBase {
       cs::utils::DefaultProperty<bool> mUseVerticalOnly{false};
     };
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /// The container for the VirtualHorizon Settings
+    Plugin::Settings::VirtualHorizon mVirtualHorizonSettings;
+
     /// The container for the Crosshair Settings
     Plugin::Settings::Crosshair mCrosshairSettings;
 
@@ -124,6 +169,7 @@ class Plugin : public cs::core::PluginBase {
   void onLoad();
 
   std::shared_ptr<Settings>    mPluginSettings = std::make_shared<Settings>();
+  std::shared_ptr<VirtualHorizon>   mVirtualHorizon;
   std::shared_ptr<Crosshair>   mCrosshair;
   std::shared_ptr<FloorGrid>   mGrid;
   std::shared_ptr<FovVignette> mVignette;

@@ -798,6 +798,26 @@
               "maxLevel": 6
             }
           }
+        },
+        "Mars": {
+          "activeImgDataset": "Blue Marble",
+          "activeDemDataset": "ETOPO1",
+          "imgDatasets": {
+            "Blue Marble": {
+              "copyright": "NASA",
+              "url": "http://localhost:8080/cgi-bin/mapserv?map=/mapserver-datasets/meta.map&service=wms",
+              "layers": "earth.bluemarble.rgb",
+              "maxLevel": 6
+            }
+          },
+          "demDatasets": {
+            "ETOPO1": {
+              "copyright": "NOAA",
+              "url": "http://localhost:8080/cgi-bin/mapserv?map=/mapserver-datasets/meta.map&service=wms",
+              "layers": "mars.etopo1.dem",
+              "maxLevel": 6
+            }
+          }
         }
       }
     },
@@ -915,9 +935,6 @@
         },
         "Moon": {
           "texture": "../share/resources/textures/moon.jpg"
-        },
-        "Mars": {
-          "texture": "../share/resources/textures/mars.jpg"
         },
         "Phobos": {
           "texture": "../share/resources/textures/phobos.jpg"

@@ -6,7 +6,99 @@
 // SPDX-License-Identifier: MIT
 
 (() => {
+
+    /**
+    * ////////////////////////////////////////////////////////////////////////////////////////////////////
+    * VirtualHorizon Api
+    */
+    class VirtualHorizonApi extends IApi {
+        /**
+         * @inheritDoc
+         */
+        name = 'virtualHorizon';
+        picker;
+
+        /**
+         * @inheritDoc
+         */
+        init() {
+            CosmoScout.gui.initSlider("virtualHorizon.setSize", 0.1, 2, 0.1, [0.5]);
+            CosmoScout.gui.initSlider("virtualHorizon.setExtent", 1, 20, 0.1, [10]);
+            CosmoScout.gui.initSlider("virtualHorizon.setAlpha", 0, 1, 0.01, [1]);
+            this.picker = document.querySelector('#virtualHorizon-setColor');
+
+            this.picker.picker = new CP(this.picker);
+            this.picker.picker.self.classList.add('no-alpha');
+            this.picker.picker.on('drag', (r, g, b, a) => {
+                const color = CP.HEX([r, g, b, 1]);
+                this.picker.style.background = color;
+                this.picker.value = color;
+
+                CosmoScout.callbacks.virtualHorizon.setColor(color);
+            });
+            this.picker.oninput = (e) => {
+                const color = CP.HEX(e.target.value);
+                this.picker.picker.set(color[0], color[1], color[2], 1);
+                this.picker.style.background = CP.HEX([color[0], color[1], color[2], 1]);
+
+                CosmoScout.callbacks.virtualHorizon.setColor(e.target.value);
+            };
+        }
+
+        setColorValue(color) {
+            this.picker.picker.set(CP.HEX(color));
+            this.picker.style.background = color;
+            this.picker.value = color;
+        }
+    }
+
+    /**
+    * ////////////////////////////////////////////////////////////////////////////////////////////////////
+    * Crosshair Api
+    */
+    class CrosshairApi extends IApi {
+        /**
+         * @inheritDoc
+         */
+        name = 'crosshair';
+        picker;
+
+        /**
+         * @inheritDoc
+         */
+        init() {
+            CosmoScout.gui.initSlider("crosshair.setSize", 0.1, 2, 0.1, [0.5]);
+            CosmoScout.gui.initSlider("crosshair.setExtent", 1, 20, 0.1, [10]);
+            CosmoScout.gui.initSlider("crosshair.setAlpha", 0, 1, 0.01, [1]);
+            this.picker = document.querySelector('#crosshair-setColor');
+
+            this.picker.picker = new CP(this.picker);
+            this.picker.picker.self.classList.add('no-alpha');
+            this.picker.picker.on('drag', (r, g, b, a) => {
+                const color = CP.HEX([r, g, b, 1]);
+                this.picker.style.background = color;
+                this.picker.value = color;
+
+                CosmoScout.callbacks.crosshair.setColor(color);
+            });
+            this.picker.oninput = (e) => {
+                const color = CP.HEX(e.target.value);
+                this.picker.picker.set(color[0], color[1], color[2], 1);
+                this.picker.style.background = CP.HEX([color[0], color[1], color[2], 1]);
+
+                CosmoScout.callbacks.crosshair.setColor(e.target.value);
+            };
+        }
+
+        setColorValue(color) {
+            this.picker.picker.set(CP.HEX(color));
+            this.picker.style.background = color;
+            this.picker.value = color;
+        }
+    }
+
   /**
+   * ////////////////////////////////////////////////////////////////////////////////////////////////////
    * Floor Grid Api
    */
   class FloorGridApi extends IApi {
@@ -51,6 +143,7 @@
   }
 
   /**
+   * ////////////////////////////////////////////////////////////////////////////////////////////////////
    * FoV Vignette Api
    */
   class FovVignetteApi extends IApi {
@@ -93,6 +186,9 @@
       this.picker.value            = color;
     }
   }
-
-  CosmoScout.init(FloorGridApi, FovVignetteApi);
+  /**
+   * ////////////////////////////////////////////////////////////////////////////////////////////////////
+   * INITIALIZATION
+   */
+    CosmoScout.init(VirtualHorizonApi, CrosshairApi, FloorGridApi, FovVignetteApi);
 })();

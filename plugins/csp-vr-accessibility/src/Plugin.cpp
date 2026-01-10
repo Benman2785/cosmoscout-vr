@@ -15,7 +15,8 @@
 #include "../../../src/cs-core/SolarSystem.hpp"
 #include "../../../src/cs-utils/logger.hpp"
 #include "../../../src/cs-utils/utils.hpp"
-#include "Crosshair.hpp"
+#include "VirtualHorizon.hpp" 
+#include "Crosshair.hpp" 
 #include "FloorGrid.hpp"
 #include "FovVignette.hpp"
 #include "logger.hpp"
@@ -37,9 +38,34 @@ EXPORT_FN void destroy(cs::core::PluginBase* pluginBase) {
 namespace csp::vraccessibility {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+// TO & FROM JSON OF VIRTUAL HORIZON
+void from_json(nlohmann::json const& j, Plugin::Settings::VirtualHorizon& o) {
+  cs::core::Settings::deserialize(j, "enabled", o.mEnabled);
+  cs::core::Settings::deserialize(j, "size", o.mSize);
+  cs::core::Settings::deserialize(j, "offset", o.mOffset);
+  cs::core::Settings::deserialize(j, "extent", o.mExtent);
+  cs::core::Settings::deserialize(j, "texture", o.mTexture);
+  cs::core::Settings::deserialize(j, "alpha", o.mAlpha);
+  cs::core::Settings::deserialize(j, "color", o.mColor);
+  cs::core::Settings::deserialize(j, "observerDir", o.mObserverDir);
+  cs::core::Settings::deserialize(j, "planetUp", o.mPlanetUp);
+}
 
-// CROSSHAIR
-    void from_json(nlohmann::json const& j, Plugin::Settings::Crosshair& o) {
+void to_json(nlohmann::json& j, Plugin::Settings::VirtualHorizon const& o) {
+  cs::core::Settings::serialize(j, "enabled", o.mEnabled);
+  cs::core::Settings::serialize(j, "size", o.mSize);
+  cs::core::Settings::serialize(j, "offset", o.mOffset);
+  cs::core::Settings::serialize(j, "extent", o.mExtent);
+  cs::core::Settings::serialize(j, "texture", o.mTexture);
+  cs::core::Settings::serialize(j, "alpha", o.mAlpha);
+  cs::core::Settings::serialize(j, "color", o.mColor);
+  cs::core::Settings::serialize(j, "observerDir", o.mObserverDir);
+  cs::core::Settings::serialize(j, "planetUp", o.mPlanetUp);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// TO & FROM JSON OF CROSSHAIR 
+void from_json(nlohmann::json const& j, Plugin::Settings::Crosshair& o) {
   cs::core::Settings::deserialize(j, "enabled", o.mEnabled);
   cs::core::Settings::deserialize(j, "size", o.mSize);
   cs::core::Settings::deserialize(j, "offset", o.mOffset);
@@ -59,8 +85,8 @@ void to_json(nlohmann::json& j, Plugin::Settings::Crosshair const& o) {
   cs::core::Settings::serialize(j, "color", o.mColor);
 }
 
-// GRID
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// TO & FROM JSON OF FLOOR GRID 
 void from_json(nlohmann::json const& j, Plugin::Settings::Grid& o) {
   cs::core::Settings::deserialize(j, "enabled", o.mEnabled);
   cs::core::Settings::deserialize(j, "size", o.mSize);
@@ -81,8 +107,8 @@ void to_json(nlohmann::json& j, Plugin::Settings::Grid const& o) {
   cs::core::Settings::serialize(j, "color", o.mColor);
 }
 
-// VIGNETTE
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// TO & FROM JSON OF VIGNETTE 
 void from_json(nlohmann::json const& j, Plugin::Settings::Vignette& o) {
   cs::core::Settings::deserialize(j, "enabled", o.mEnabled);
   cs::core::Settings::deserialize(j, "debug", o.mDebug);
@@ -110,12 +136,14 @@ void to_json(nlohmann::json& j, Plugin::Settings::Vignette const& o) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void from_json(nlohmann::json const& j, Plugin::Settings& o) {
+  cs::core::Settings::deserialize(j, "virtualHorizon", o.mVirtualHorizonSettings);
   cs::core::Settings::deserialize(j, "crosshair", o.mCrosshairSettings);
   cs::core::Settings::deserialize(j, "grid", o.mGridSettings);
   cs::core::Settings::deserialize(j, "vignette", o.mVignetteSettings);
 }
 
 void to_json(nlohmann::json& j, Plugin::Settings const& o) {
+  cs::core::Settings::serialize(j, "virtualHorizon", o.mVirtualHorizonSettings);
   cs::core::Settings::serialize(j, "crosshair", o.mCrosshairSettings);
   cs::core::Settings::serialize(j, "grid", o.mGridSettings);
   cs::core::Settings::serialize(j, "vignette", o.mVignetteSettings);
@@ -135,7 +163,52 @@ void Plugin::init() {
       "../share/resources/gui/vr_accessibility_settings.html");
   mGuiManager->executeJavascriptFile("../share/resources/gui/js/csp-vr-accessibility.js");
 
-  // === CROSSHAIR ===
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+  // SETTINGS FOR VIRTUAL HORIZON
+
+  // register callback for virtualHorizon enable virtualHorizon checkbox
+  mGuiManager->getGui()->registerCallback("virtualHorizon.setEnabled",
+      "Enables or disables rendering the virtualHorizon.", std::function([this](bool enable) {
+        mPluginSettings->mVirtualHorizonSettings.mEnabled = enable;
+      }));
+  mPluginSettings->mVirtualHorizonSettings.mEnabled.connectAndTouch(
+      [this](bool enable) { mGuiManager->setCheckboxValue("virtualHorizon.setEnabled", enable); });
+
+  // register callback for virtualHorizon size slider
+  mGuiManager->getGui()->registerCallback("virtualHorizon.setSize",
+      "Value scales the virtualHorizon texture size.", std::function([this](double value) {
+        mPluginSettings->mVirtualHorizonSettings.mSize = static_cast<float>(value);
+      }));
+  mPluginSettings->mVirtualHorizonSettings.mSize.connectAndTouch(
+      [this](float value) { mGuiManager->setSliderValue("virtualHorizon.setSize", value); });
+
+  // register callback for virtualHorizon extent slider
+  mGuiManager->getGui()->registerCallback("virtualHorizon.setExtent",
+      "Value to scale the entire virtualHorizon.", std::function([this](double value) {
+        mPluginSettings->mVirtualHorizonSettings.mExtent = static_cast<float>(value);
+      }));
+  mPluginSettings->mVirtualHorizonSettings.mExtent.connectAndTouch(
+      [this](float value) { mGuiManager->setSliderValue("virtualHorizon.setExtent", value); });
+
+  // register callback for virtualHorizon alpha slider
+  mGuiManager->getGui()->registerCallback("virtualHorizon.setAlpha",
+      "Value to adjust virtualHorizon opacity.", std::function([this](double value) {
+        mPluginSettings->mVirtualHorizonSettings.mAlpha = static_cast<float>(value);
+      }));
+  mPluginSettings->mVirtualHorizonSettings.mAlpha.connectAndTouch(
+      [this](float value) { mGuiManager->setSliderValue("virtualHorizon.setAlpha", value); });
+
+  // register callback for virtualHorizon color picker
+  mGuiManager->getGui()->registerCallback("virtualHorizon.setColor",
+      "Value to adjust color of the virtualHorizon.", std::function([this](std::string value) {
+        mPluginSettings->mVirtualHorizonSettings.mColor = static_cast<std::string>(value);
+      }));
+  mPluginSettings->mVirtualHorizonSettings.mColor.connectAndTouch([this](std::string value) {
+    mGuiManager->getGui()->callJavascript("CosmoScout.virtualHorizon.setColorValue", value);
+  });
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+  // SETTINGS FOR CROSSHAIR
 
   // register callback for crosshair enable crosshair checkbox
   mGuiManager->getGui()->registerCallback("crosshair.setEnabled",
@@ -177,7 +250,8 @@ void Plugin::init() {
     mGuiManager->getGui()->callJavascript("CosmoScout.crosshair.setColorValue", value);
   });
 
-  // === GRID ===
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+  // SETTINGS FOR FLOOR GRID
 
   // register callback for grid enable grid checkbox
   mGuiManager->getGui()->registerCallback("floorGrid.setEnabled",
@@ -219,7 +293,8 @@ void Plugin::init() {
     mGuiManager->getGui()->callJavascript("CosmoScout.floorGrid.setColorValue", value);
   });
 
-  // === VIGNETTE ===
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+  // SETTINGS FOR VIGNETTE
 
   // register callback for fov vignette enable checkbox
   mGuiManager->getGui()->registerCallback("fovVignette.setEnabled",
@@ -317,21 +392,31 @@ void Plugin::deInit() {
   // remove settings tab
   mGuiManager->removeSettingsSection("VR Accessibility");
 
+  mGuiManager->getGui()->callJavascript("CosmoScout.removeApi", "virtualHorizon");
   mGuiManager->getGui()->callJavascript("CosmoScout.removeApi", "crosshair");
   mGuiManager->getGui()->callJavascript("CosmoScout.removeApi", "floorGrid");
   mGuiManager->getGui()->callJavascript("CosmoScout.removeApi", "fovVignette");
 
   // remove callbacks
+  //virtualHorizon
+  mGuiManager->getGui()->unregisterCallback("virtualHorizon.setEnabled");
+  mGuiManager->getGui()->unregisterCallback("virtualHorizon.setSize");
+  mGuiManager->getGui()->unregisterCallback("virtualHorizon.setExtent");
+  mGuiManager->getGui()->unregisterCallback("virtualHorizon.setAlpha");
+  mGuiManager->getGui()->unregisterCallback("virtualHorizon.setColor");
+  //crosshair
   mGuiManager->getGui()->unregisterCallback("crosshair.setEnabled");
   mGuiManager->getGui()->unregisterCallback("crosshair.setSize");
   mGuiManager->getGui()->unregisterCallback("crosshair.setExtent");
   mGuiManager->getGui()->unregisterCallback("crosshair.setAlpha");
   mGuiManager->getGui()->unregisterCallback("crosshair.setColor");
+  //floorGrid
   mGuiManager->getGui()->unregisterCallback("floorGrid.setEnabled");
   mGuiManager->getGui()->unregisterCallback("floorGrid.setSize");
   mGuiManager->getGui()->unregisterCallback("floorGrid.setExtent");
   mGuiManager->getGui()->unregisterCallback("floorGrid.setAlpha");
   mGuiManager->getGui()->unregisterCallback("floorGrid.setColor");
+  //vignette
   mGuiManager->getGui()->unregisterCallback("fovVignette.setEnabled");
   mGuiManager->getGui()->unregisterCallback("fovVignette.setDebug");
   mGuiManager->getGui()->unregisterCallback("fovVignette.setEnableDynamicRadius");
@@ -355,6 +440,9 @@ void Plugin::update() {
   if (resetColorPicker) {
     // reread settings from json
     from_json(mAllSettings->mPlugins.at("csp-vr-accessibility"), *mPluginSettings);
+    // reset virtualHorizon color into picker
+    mGuiManager->getGui()->callJavascript("CosmoScout.virtualHorizon.setColorValue",
+        mPluginSettings->mVirtualHorizonSettings.mColor.get());
     // reset crosshair color into picker
     mGuiManager->getGui()->callJavascript(
         "CosmoScout.crosshair.setColorValue", mPluginSettings->mCrosshairSettings.mColor.get());
@@ -368,10 +456,13 @@ void Plugin::update() {
     resetColorPicker = false;
   }
 
+  // trigger update method in other parts of the plugin, if they are enabled
+  if (mPluginSettings->mVirtualHorizonSettings.mEnabled.get()) {
+    mVirtualHorizon->update();
+  }
   if (mPluginSettings->mCrosshairSettings.mEnabled.get()) {
     mCrosshair->update();
   }
-
   if (mPluginSettings->mGridSettings.mEnabled.get()) {
     mGrid->update();
   }
@@ -391,12 +482,19 @@ void Plugin::onLoad() {
   // Read settings from JSON.
   from_json(mAllSettings->mPlugins.at("csp-vr-accessibility"), *mPluginSettings);
 
+    // Create & configure VirtualHorizon
+  mVirtualHorizon =
+      std::make_shared<VirtualHorizon>(mSolarSystem, mPluginSettings->mVirtualHorizonSettings);
+  mVirtualHorizon->configure(mPluginSettings->mVirtualHorizonSettings); 
+
   // Create & configure Crosshair
   mCrosshair = std::make_shared<Crosshair>(mSolarSystem, mPluginSettings->mCrosshairSettings);
-  mCrosshair->configure(mPluginSettings->mCrosshairSettings);
+  mCrosshair->configure(mPluginSettings->mCrosshairSettings); 
+
   // Create & configure FloorGrid
   mGrid = std::make_shared<FloorGrid>(mSolarSystem, mPluginSettings->mGridSettings);
   mGrid->configure(mPluginSettings->mGridSettings);
+
   // Create & configure FovVignette
   mVignette = std::make_shared<FovVignette>(mSolarSystem, mPluginSettings->mVignetteSettings);
   mVignette->configure(mPluginSettings->mVignetteSettings);

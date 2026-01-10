@@ -10,7 +10,7 @@ REM =====================================================
 REM Starte WSL und führe Befehle aus
 REM =====================================================
 echo Starte Ubuntu WSL und Docker MapServer...
-wsl bash -c "cd %PROJECT_PATH% && sudo docker run -ti --rm -p 8080:80 ghcr.io/cosmoscout/mapserver-example"
+wsl bash -c "cd %PROJECT_PATH% && sudo docker run -ti --rm -p 8080:80 -v ../docker-mapserver/mapserver-datasets:/mapserver-datasets ghcr.io/cosmoscout/mapserver-base"
 
 echo.
 echo MapServer beendet.

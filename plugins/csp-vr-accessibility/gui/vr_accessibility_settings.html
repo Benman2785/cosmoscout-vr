@@ -1,7 +1,105 @@
-<!-- 
+<!--
 SPDX-FileCopyrightText: German Aerospace Center (DLR) <cosmoscout@dlr.de>
 SPDX-License-Identifier: MIT
 -->
+
+<!-- VirtualHorizon -->
+
+<div class="row">
+    <div class="col-5">
+        <label class="checklabel">
+            <input type="checkbox" data-callback="virtualHorizon.setEnabled" checked />
+            <i class="material-icons"></i>
+            <span>VirtualHorizon</span>
+        </label>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-5">
+        Size
+    </div>
+    <div class="col-7">
+        <div data-callback="virtualHorizon.setSize"></div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-5">
+        Extent
+    </div>
+    <div class="col-7">
+        <div data-callback="virtualHorizon.setExtent"></div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-5">
+        Opacity
+    </div>
+    <div class="col-7">
+        <div data-callback="virtualHorizon.setAlpha"></div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-5">
+        Color
+    </div>
+    <div class="col-7">
+        <input type="text" class="form-control color-input" id="virtualHorizon-setColor" style="color: white;" value="">
+    </div>
+</div>
+
+<!-- Crosshair -->
+
+<div class="row">
+    <div class="col-5">
+        <label class="checklabel">
+            <input type="checkbox" data-callback="crosshair.setEnabled" checked />
+            <i class="material-icons"></i>
+            <span>Crosshair</span>
+        </label>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-5">
+        Size
+    </div>
+    <div class="col-7">
+        <div data-callback="crosshair.setSize"></div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-5">
+        Extent
+    </div>
+    <div class="col-7">
+        <div data-callback="crosshair.setExtent"></div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-5">
+        Opacity
+    </div>
+    <div class="col-7">
+        <div data-callback="crosshair.setAlpha"></div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-5">
+        Color
+    </div>
+    <div class="col-7">
+        <input type="text" class="form-control color-input" id="crosshair-setColor" style="color: white;" value="">
+    </div>
+</div>
+
+<!-- FLOOR GRID -->
 
 <div class="row">
     <div class="col-5">
@@ -48,6 +146,8 @@ SPDX-License-Identifier: MIT
         <input type="text" class="form-control color-input" id="floorGrid-setColor" style="color: white;" value="">
     </div>
 </div>
+
+<!-- VIGNETTE -->
 
 <hr class="my-3">
 
