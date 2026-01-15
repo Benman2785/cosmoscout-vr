@@ -26,7 +26,10 @@ ObserverNavigationNode::ObserverNavigationNode(
     , mRotationOffset(nullptr)
     , mPreventNavigationWhenHoveredGui(
           oParams.GetValueOrDefault<bool>("prevent_navigation_when_hovered_gui", true))
-    , mFixedHorizon(oParams.GetValueOrDefault<bool>("fixed_horizon", false))
+    , mFixedHorizon(oParams.GetValueOrDefault<bool>("fixed_horizon", true))
+    , mCurveFlight(oParams.GetValueOrDefault<bool>("curve_flight", true))
+    , mLimitHeightMin(oParams.GetValueOrDefault<bool>("limit_height_min", true))
+    , mLimitHeightMax(oParams.GetValueOrDefault<bool>("limit_height_max", true))
     , mMaxAngularSpeed(oParams.GetValueOrDefault<double>("max_angular_speed", glm::pi<double>()))
     , mMaxLinearSpeed(oParams.GetValueOrDefault<VistaVector3D>(
           "max_linear_speed", VistaVector3D(1.0, 1.0, 1.0)))
@@ -157,8 +160,67 @@ bool ObserverNavigationNode::DoEvalNode() {
   vTranslation += vOffset;
 
   auto& oObs        = mSolarSystem->getObserver();
-  auto  newPosition = oObs.getPosition() + oObs.getRotation() * vTranslation * oObs.getScale();
+  glm::dvec3 newPosition;
+
+  newPosition = oObs.getPosition() + oObs.getRotation() * vTranslation * oObs.getScale();
   oObs.setPosition(newPosition);
+
+  // HEIGHT LIMITING
+  if (mSolarSystem->pActiveObject.get() && (mLimitHeightMin || mLimitHeightMax)) {
+
+    auto planet = mSolarSystem->pActiveObject.get();
+
+    // Planet radii *must* be scaled
+    glm::dvec3 radii = planet->getRadii() * planet->getScale();
+
+    // Planet center in observer/world coordinates
+    glm::dvec3 planetPos = planet->getPosition();
+
+    // Observer position in world coords
+    glm::dvec3 obsPos = oObs.getPosition();
+
+    // Vector from planet center to observer
+    glm::dvec3 vObserver = obsPos - planetPos;
+
+    // Compute point on the surface directly beneath observer
+    glm::dvec3 surfacePos = cs::utils::convert::scaleToGeodeticSurface(vObserver, radii);
+
+    // convert surfacePos back to world coordinates
+    surfacePos += planetPos;
+
+    // local planetary surface radius
+    double surfaceRadius = glm::length(surfacePos - planetPos);
+
+    // current radius
+    double rObserver = glm::length(vObserver);
+
+    // current height above surface
+    double height = rObserver - surfaceRadius;
+
+    double minHeight = 25000.0 * planet->getScale();
+    double maxHeight = 500000.0 * planet->getScale();
+
+    bool   changed      = false;
+    double targetRadius = rObserver;
+    
+    if (mLimitHeightMin && height < minHeight) {
+      targetRadius = surfaceRadius + minHeight;
+      changed      = true;
+    }
+
+    if (mLimitHeightMax && height > maxHeight) {
+      targetRadius = surfaceRadius + maxHeight;
+      changed      = true;
+    }
+
+    if (changed) {
+      glm::dvec3 dir    = glm::normalize(vObserver);
+      glm::dvec3 newPos = planetPos + dir * targetRadius;
+
+      oObs.setPosition(newPos);
+      newPosition = newPos;
+    }
+  }
 
   glm::dquat qRotationOffset(1 , 0 ,0 ,0);
 
@@ -177,6 +239,63 @@ bool ObserverNavigationNode::DoEvalNode() {
   auto newRotation =
       glm::normalize(oObs.getRotation() * glm::angleAxis(dRotationAngle, vRotationAxis) * qRotationOffset);
 
+// --- STABILER CURVE-FLIGHT: sanfte Neigung an Planetenkrümmung ---
+  if (mCurveFlight && mSolarSystem->pActiveObject.get()) {
+
+    // Planetendaten
+    auto      planet       = mSolarSystem->pActiveObject.get();
+    glm::dvec3 planetCenter = planet->getPosition();
+
+    // newPosition ist schon berechnet (Position wurde angewendet), benutze diese Position
+    // um das lokale Up zu bestimmen (Vektor vom Planetenmittelpunkt zum Beobachter).
+    glm::dvec3 newUp = glm::normalize(newPosition - planetCenter);
+
+    // current forward aus der gerade berechneten Rotation
+    glm::dvec3 forward = newRotation * glm::dvec3(0.0, 0.0, 1.0);
+
+    // Wie sehr zeigt forward in radialer (newUp-)Richtung?
+    // (positive Werte: forward zeigt weg vom Planeten; negative: in Richtung Planet)
+    double radial = glm::dot(forward, newUp);
+
+    // Wenn forward bereits tangential ist, nichts tun
+    if (std::abs(radial) > 1e-6) {
+
+      // Tangentialprojektionsvektor (forward in Tangentialebene):
+      glm::dvec3 projected = forward - radial * newUp;
+
+      // numerische Absicherung: falls projected zu klein, skip
+      if (glm::length2(projected) > 1e-12) {
+        projected = glm::normalize(projected);
+
+        // kleinster Rotationsaxis/angle von forward -> projected
+        glm::dvec3 axis = glm::cross(forward, projected);
+
+        // Länge von axis ist sin(angle). Clamp um numerische Probleme zu vermeiden.
+        double sinAngle = glm::clamp(glm::length(axis), 0.0, 1.0);
+        double angle    = std::asin(sinAngle);
+
+        // falls angle numerisch sehr klein -> skip
+        if (angle > 1e-9) {
+          axis = glm::normalize(axis);
+
+          // --- WICHTIG: weiche Korrektur (tweakbar)
+          // 0.0 = keine Korrektur, 1.0 = vollständige sofortige Korrektur (würde flackern)
+          // Empfohlener Standard: 0.05 .. 0.2 (je nach gewünschtem "naklapp"-Gefühl)
+          const double correctionFactor = 0.08; // <- anpassen wenn du aggressiver/leichter willst
+
+          double appliedAngle = angle * correctionFactor;
+
+          // Wenn appliedAngle sehr klein ist, skip (vermeidet tiny quaternion jitter)
+          if (appliedAngle > 1e-7) {
+            glm::dquat correction = glm::angleAxis(appliedAngle, axis);
+            // wende Korrektur vor der bestehenden Rotation an (lokale Rotation)
+            newRotation = glm::normalize(correction * newRotation);
+          }
+        }
+      }
+    }
+  }
+  
   // If mFixedHorizon is set, we rotate the observer so that the horizon of the active object is
   // always leveled. For now, this breaks if we are in outer space or looking straight up or down.
   // But it can be very useful in cases were we know that the user is always close to a planet.

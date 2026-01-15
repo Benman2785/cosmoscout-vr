@@ -52,6 +52,9 @@ class ObserverNavigationNode : public IVdfnNode {
 
   const bool          mPreventNavigationWhenHoveredGui;
   const bool          mFixedHorizon;
+  const bool          mCurveFlight;
+  const bool          mLimitHeightMin;
+  const bool          mLimitHeightMax;
   const double        mMaxAngularSpeed;
   const VistaVector3D mMaxLinearSpeed;
 

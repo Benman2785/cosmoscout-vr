@@ -290,7 +290,7 @@ void SolarSystem::update() {
     if (!mSpiceFrameChangedLastFrame) {
       double const secToNano = 1.0e9;
       // delta in traveling direction
-      glm::dvec3 delta      = observerPosition - mLastPosition;
+      glm::dvec3 delta = observerPosition - mLastPosition;
       pCurrentObserverSpeed = static_cast<float>(secToNano * glm::length(delta) / duration);
 
       // Save speed and direction in observer, for other classes to read
@@ -346,6 +346,10 @@ void SolarSystem::updateSceneScale() {
       vClosestPlanetObserverPosition = vObserverPos;
     }
   }
+
+  // Save information about closest object (planet) and vector from that object to the observer
+  // in the Observer, for other classes to use
+  mObserver.setClosestPlanetToObserver(closestObject, vClosestPlanetObserverPosition);
 
   // Now that we found a closest body, we will scale the observer in such a way, that the closest
   // body is rendered at a distance between mSettings->mSceneScale.mCloseVisualDistance and
