@@ -120,7 +120,7 @@ bool Application::Init(VistaSystem* pVistaSystem) {
   // The ObserverNavigationNode is used by several DFN networks to move the celestial observer.
   VdfnNodeFactory* pNodeFactory = VdfnNodeFactory::GetSingleton();
   pNodeFactory->SetNodeCreator( // NOLINTNEXTLINE: TODO is this a memory leak?
-      "ObserverNavigationNode", new ObserverNavigationNodeCreate(mSolarSystem.get()));
+      "ObserverNavigationNode", new ObserverNavigationNodeCreate(mSolarSystem.get(), mSettings.get()));
   pNodeFactory->SetNodeCreator( // NOLINTNEXTLINE: TODO is this a memory leak?
       "GetSelectionStateNode", new GetSelectionStateNodeCreate(mInputManager.get()));
 

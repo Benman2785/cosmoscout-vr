@@ -60,6 +60,8 @@
         <node name="pitch_calibrate" type="Multiply[float]"/>      
         
         <node name="pitch_weighted_speed" type="Multiply[float]"/>
+        <node name="pitch_weighted_speed_scaled" type="Multiply[float]"/>
+        <node name="pitch_weighted_speed_signed" type="Multiply[float]"/>
 
         <node name="key_speed_up" type="LatestUpdate[bool]"/>
         <node name="key_speed_down" type="LatestUpdate[bool]"/>
@@ -95,7 +97,7 @@
             <param name="value" value="-1.0" />
         </node>
 
-        <node name="pitch_calibrate_value" type="ConstantValue[float]">         <param name="value" value="0.01" />
+        <node name="pitch_calibrate_value" type="ConstantValue[float]">         <param name="value" value="1.0" />
         </node>
 
         <node name="roll_calibration_value" type="ConstantValue[float]">         <param name="value" value="0.5" />
@@ -110,6 +112,10 @@
 
         <node name="yaw_axis" type="ConstantValue[VistaVector3D]">
             <param name="value" value="0,1,0,0" />
+        </node>
+
+        <node name="y_invert" type="ConstantValue[float]">
+            <param name="value" value="-1.0"/>
         </node>
 
         <node name="pitch_axis" type="ConstantValue[VistaVector3D]">
@@ -213,8 +219,14 @@
 
         <edge fromnode="zero" tonode="movement" fromport="value" toport="x" />
         
-        <edge fromnode="pitch_weighted_speed" tonode="movement" fromport="out" toport="y" />        
-        
+        <!-- pitch (up and down) into y translation * speed * scale -->
+        <edge fromnode="pitch_weighted_speed" tonode="pitch_weighted_speed_scaled" fromport="out" toport="first" />
+        <edge fromnode="observer_speed" tonode="pitch_weighted_speed_scaled" fromport="value" toport="second" />
+        <edge fromnode="pitch_weighted_speed_scaled" tonode="pitch_weighted_speed_signed" fromport="out" toport="first" />
+        <edge fromnode="y_invert" tonode="pitch_weighted_speed_signed" fromport="value" toport="second" />
+        <edge fromnode="pitch_weighted_speed_signed" tonode="movement" fromport="out" toport="y" />
+
+
         <edge fromnode="updated_speed" tonode="movement" fromport="out"  toport="z" />
         <edge fromnode="movement" tonode="observer" fromport="out" toport="translation" />
         <edge fromnode="timer" tonode="observer" fromport="time" toport="time" />

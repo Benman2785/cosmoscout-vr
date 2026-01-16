@@ -32,7 +32,7 @@ class SolarSystem;
 /// or config/vista/xml/headtracking.xml for example usages of this node.
 class ObserverNavigationNode : public IVdfnNode {
  public:
-  ObserverNavigationNode(cs::core::SolarSystem* pSolarSystem, VistaPropertyList const& oParams);
+  ObserverNavigationNode(cs::core::SolarSystem* pSolarSystem, cs::core::Settings* pSettings, VistaPropertyList const& oParams);
 
   bool PrepareEvaluationRun() override;
 
@@ -42,6 +42,7 @@ class ObserverNavigationNode : public IVdfnNode {
 
  private:
   cs::core::SolarSystem* mSolarSystem;
+  cs::core::Settings*    mSettings;
 
   TVdfnPort<double>*          mTime;
   TVdfnPort<VistaVector3D>*   mTranslation;
@@ -71,11 +72,12 @@ class ObserverNavigationNode : public IVdfnNode {
 
 class ObserverNavigationNodeCreate : public VdfnNodeFactory::IVdfnNodeCreator {
  public:
-  ObserverNavigationNodeCreate(cs::core::SolarSystem* pSolarSystem);
+  ObserverNavigationNodeCreate(cs::core::SolarSystem* pSolarSystem, cs::core::Settings* pSettings);
   IVdfnNode* CreateNode(const VistaPropertyList& oParams) const override;
 
  private:
   cs::core::SolarSystem* mSolarSystem;
+  cs::core::Settings*    mSettings;	
 };
 
 #endif // CS_OBSERVER_NAVIGATION_NODE_HPP

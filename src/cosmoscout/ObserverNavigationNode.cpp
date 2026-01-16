@@ -10,6 +10,8 @@
 #include "../cs-core/SolarSystem.hpp"
 #include "../cs-gui/GuiItem.hpp"
 #include "../cs-utils/convert.hpp"
+#include "../cs-scene/CelestialSurface.hpp"
+#include "../cs-core/Settings.hpp"
 
 #include <VistaAspects/VistaPropertyAwareable.h>
 #include <glm/gtx/io.hpp>
@@ -17,8 +19,9 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ObserverNavigationNode::ObserverNavigationNode(
-    cs::core::SolarSystem* pSolarSystem, VistaPropertyList const& oParams)
+    cs::core::SolarSystem* pSolarSystem, cs::core::Settings* pSettings, VistaPropertyList const& oParams)
     : mSolarSystem(pSolarSystem)
+    , mSettings(pSettings)
     , mTime(nullptr)
     , mTranslation(nullptr)
     , mRotation(nullptr)
@@ -188,16 +191,28 @@ bool ObserverNavigationNode::DoEvalNode() {
     // convert surfacePos back to world coordinates
     surfacePos += planetPos;
 
+    glm::dvec3 surfacePosEllipsoid = surfacePos;
+
+    // add surface height data to surfacePos
+    if (planet->getSurface()) {
+      auto lngLatHeight = cs::utils::convert::cartesianToLngLatHeight(vObserver, radii);
+      surfacePos +=
+          glm::normalize(surfacePos) * (planet->getSurface()->getHeight(lngLatHeight.xy()) *
+                                           mSettings->mGraphics.pHeightScale.get());
+    }
+
     // local planetary surface radius
     double surfaceRadius = glm::length(surfacePos - planetPos);
+    double surfaceRadiusEllipsoid = glm::length(surfacePosEllipsoid - planetPos);
 
     // current radius
     double rObserver = glm::length(vObserver);
 
     // current height above surface
     double height = rObserver - surfaceRadius;
+    double heightEllipsoid = rObserver - surfaceRadiusEllipsoid;
 
-    double minHeight = 25000.0 * planet->getScale();
+    double minHeight = 2000.0 * planet->getScale();
     double maxHeight = 500000.0 * planet->getScale();
 
     bool   changed      = false;
@@ -205,11 +220,13 @@ bool ObserverNavigationNode::DoEvalNode() {
     
     if (mLimitHeightMin && height < minHeight) {
       targetRadius = surfaceRadius + minHeight;
+      //logger().info("Min Height={}", targetRadius);
       changed      = true;
     }
 
-    if (mLimitHeightMax && height > maxHeight) {
-      targetRadius = surfaceRadius + maxHeight;
+    if (mLimitHeightMax && heightEllipsoid > maxHeight) {
+      targetRadius = surfaceRadiusEllipsoid + maxHeight;
+      //logger().info("Max Height={}", targetRadius);
       changed      = true;
     }
 
@@ -324,14 +341,15 @@ bool ObserverNavigationNode::DoEvalNode() {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ObserverNavigationNodeCreate::ObserverNavigationNodeCreate(cs::core::SolarSystem* pSolarSystem)
-    : mSolarSystem(pSolarSystem) {
+ObserverNavigationNodeCreate::ObserverNavigationNodeCreate(cs::core::SolarSystem* pSolarSystem, cs::core::Settings* pSettings)
+    : mSolarSystem(pSolarSystem)
+    , mSettings(pSettings) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 IVdfnNode* ObserverNavigationNodeCreate::CreateNode(const VistaPropertyList& oParams) const {
-  return new ObserverNavigationNode(mSolarSystem, oParams.GetSubListConstRef("param"));
+  return new ObserverNavigationNode(mSolarSystem, mSettings, oParams.GetSubListConstRef("param"));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
