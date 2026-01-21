@@ -8,9 +8,9 @@
 #include "VirtualHorizon.hpp"
 
 #include "../../../src/cs-core/SolarSystem.hpp"
-#include "../../../src/cs-scene/CelestialObserver.hpp"
-#include "../../../src/cs-scene/CelestialObject.hpp"
 #include "../../../src/cs-graphics/TextureLoader.hpp"
+#include "../../../src/cs-scene/CelestialObject.hpp"
+#include "../../../src/cs-scene/CelestialObserver.hpp"
 #include "../../../src/cs-utils/FrameStats.hpp"
 #include "logger.hpp"
 
@@ -64,7 +64,7 @@ void main() {
   );
 
   // Base position (in camera space)
-  vec3 basePos = vec3(iQuadPos.x * uSize, iQuadPos.y * uSize * 15.0, -10.0 * uExtent);
+  vec3 basePos = vec3(iQuadPos.x * uSize * 10, iQuadPos.y * uSize * 10, -15.0 * uExtent);
 
   // Apply rotation
   vec3 rotatedPos = rot * basePos;
@@ -74,7 +74,6 @@ void main() {
   gl_Position = uMatProjection * vec4(pos, 1.0);
 }
 )";
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -101,9 +100,9 @@ void main() {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//Constructor
-VirtualHorizon::VirtualHorizon(
-    std::shared_ptr<cs::core::SolarSystem> solarSystem, Plugin::Settings::VirtualHorizon& virtualHorizonSettings)
+// Constructor
+VirtualHorizon::VirtualHorizon(std::shared_ptr<cs::core::SolarSystem> solarSystem,
+    Plugin::Settings::VirtualHorizon&                                 virtualHorizonSettings)
     : mSolarSystem(std::move(solarSystem))
     , mVirtualHorizonSettings(virtualHorizonSettings) {
 
@@ -135,7 +134,7 @@ VirtualHorizon::VirtualHorizon(
   mUniforms.alpha            = mShader.GetUniformLocation("uAlpha");
   mUniforms.color            = mShader.GetUniformLocation("uCustomColor");
   mUniforms.observerDir      = mShader.GetUniformLocation("uObserverDir");
-  mUniforms.planetUp         = mShader.GetUniformLocation("uPlanetUp"); 
+  mUniforms.planetUp         = mShader.GetUniformLocation("uPlanetUp");
 
   // Load Texture
   mTexture = cs::graphics::TextureLoader::loadFromFile(virtualHorizonSettings.mTexture.get());
@@ -158,7 +157,7 @@ VirtualHorizon::VirtualHorizon(
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//Destructor
+// Destructor
 VirtualHorizon::~VirtualHorizon() {
   // remove Nodes from GUI
   auto* platform = GetVistaSystem()
@@ -191,12 +190,12 @@ void VirtualHorizon::update() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool VirtualHorizon::Do() {
-  auto const& mObserver = mSolarSystem->getObserver();
-  auto        dir       = mObserver.getVelocityDirection();
-  auto        speed     = mObserver.getVelocityMagnitude();
+  auto const& mObserver           = mSolarSystem->getObserver();
+  auto        dir                 = mObserver.getVelocityDirection();
+  auto        speed               = mObserver.getVelocityMagnitude();
   glm::dvec3  nearestPlanetPos    = mObserver.getClosestPlanetToObserverPosition();
   glm::dvec3  nearestPlanetNormal = glm::normalize(nearestPlanetPos);
-  //to be used by the shader:
+  // to be used by the shader:
   glm::vec3 observerDirF = glm::vec3(dir);
   glm::vec3 planetUpF    = glm::vec3(nearestPlanetNormal);
 
@@ -255,7 +254,7 @@ bool VirtualHorizon::Do() {
   glPushAttrib(GL_ENABLE_BIT | GL_BLEND | GL_DEPTH_BUFFER_BIT);
   glEnable(GL_BLEND);
   glBlendFunc(GL_ONE, GL_ONE); // turns black-mask texture into alpha (technically not correct)
-  
+
   // Disable depth test -> always draw on top
   glDisable(GL_DEPTH_TEST);
   glDepthMask(false);

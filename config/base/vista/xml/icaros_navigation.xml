@@ -123,7 +123,7 @@
         </node>
         
         <node name="clamp_low_value" type="ConstantValue[float]">
-            <param name="value" value="0" />
+            <param name="value" value="10" />
         </node>
         <node name="clamp_high_value" type="ConstantValue[float]">
             <param name="value" value="100" />

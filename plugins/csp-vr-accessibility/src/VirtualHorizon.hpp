@@ -65,6 +65,8 @@ class VirtualHorizon : public IVistaOpenGLDraw {
   VistaVertexArrayObject        mVAO;
   VistaBufferObject             mVBO;
 
+  glm::vec3 lastObserverDir = glm::uvec3(0, 0, -1);
+
   struct {
     uint32_t modelViewMatrix  = 0;
     uint32_t projectionMatrix = 0;

@@ -3,6 +3,49 @@ SPDX-FileCopyrightText: German Aerospace Center (DLR) <cosmoscout@dlr.de>
 SPDX-License-Identifier: MIT
 -->
 
+<!-- MOTION POINTS -->
+
+<hr class="my-3">
+
+<div class="row">
+    <div class="col-5">
+        <label class="checklabel">
+            <input type="checkbox" data-callback="motionPoints.setEnabled" />
+            <i class="material-icons"></i>
+            <span>Motion Points</span>
+        </label>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-5">Point Count</div>
+    <div class="col-7">
+        <div data-callback="motionPoints.setCount"></div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-5">Radius</div>
+    <div class="col-7">
+        <div data-callback="motionPoints.setRadius"></div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-5">Point Size</div>
+    <div class="col-7">
+        <div data-callback="motionPoints.setSize"></div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-5">Color</div>
+    <div class="col-7">
+        <input type="text" class="form-control color-input" id="motionPoints-setColor" style="color: white;" value="" />
+    </div>
+</div>
+
+
 <!-- VirtualHorizon -->
 
 <div class="row">

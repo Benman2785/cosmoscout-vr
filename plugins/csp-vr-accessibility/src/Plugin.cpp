@@ -19,6 +19,7 @@
 #include "Crosshair.hpp" 
 #include "FloorGrid.hpp"
 #include "FovVignette.hpp"
+#include "MotionPointField.hpp"
 #include "logger.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -36,6 +37,27 @@ EXPORT_FN void destroy(cs::core::PluginBase* pluginBase) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 namespace csp::vraccessibility {
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// TO & FROM JSON OF MOTION POINT FIELD
+void from_json(nlohmann::json const& j, Plugin::Settings::MotionPoints& o) {
+  cs::core::Settings::deserialize(j, "enabled", o.mEnabled);
+  cs::core::Settings::deserialize(j, "count", o.mCount);
+  cs::core::Settings::deserialize(j, "radius", o.mRadius);
+  cs::core::Settings::deserialize(j, "size", o.mSize);
+  cs::core::Settings::deserialize(j, "color", o.mColor);
+  cs::core::Settings::deserialize(j, "alpha", o.mAlpha);
+}
+
+void to_json(nlohmann::json& j, Plugin::Settings::MotionPoints const& o) {
+  cs::core::Settings::serialize(j, "enabled", o.mEnabled);
+  cs::core::Settings::serialize(j, "count", o.mCount);
+  cs::core::Settings::serialize(j, "radius", o.mRadius);
+  cs::core::Settings::serialize(j, "size", o.mSize);
+  cs::core::Settings::serialize(j, "color", o.mColor);
+  cs::core::Settings::serialize(j, "alpha", o.mAlpha);
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // TO & FROM JSON OF VIRTUAL HORIZON
@@ -136,6 +158,7 @@ void to_json(nlohmann::json& j, Plugin::Settings::Vignette const& o) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void from_json(nlohmann::json const& j, Plugin::Settings& o) {
+  cs::core::Settings::deserialize(j, "motionPoints", o.mMotionPointsSettings);
   cs::core::Settings::deserialize(j, "virtualHorizon", o.mVirtualHorizonSettings);
   cs::core::Settings::deserialize(j, "crosshair", o.mCrosshairSettings);
   cs::core::Settings::deserialize(j, "grid", o.mGridSettings);
@@ -143,6 +166,7 @@ void from_json(nlohmann::json const& j, Plugin::Settings& o) {
 }
 
 void to_json(nlohmann::json& j, Plugin::Settings const& o) {
+  cs::core::Settings::serialize(j, "motionPoints", o.mMotionPointsSettings);
   cs::core::Settings::serialize(j, "virtualHorizon", o.mVirtualHorizonSettings);
   cs::core::Settings::serialize(j, "crosshair", o.mCrosshairSettings);
   cs::core::Settings::serialize(j, "grid", o.mGridSettings);
@@ -162,6 +186,45 @@ void Plugin::init() {
   mGuiManager->addSettingsSectionToSideBarFromHTML("VR Accessibility", "accessibility_new",
       "../share/resources/gui/vr_accessibility_settings.html");
   mGuiManager->executeJavascriptFile("../share/resources/gui/js/csp-vr-accessibility.js");
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+  // SETTINGS FOR MOTION POINT FIELD
+
+  mGuiManager->getGui()->registerCallback("motionPoints.setEnabled",
+      "Enables or disables the motion point field.", std::function([this](bool enable) {
+        mPluginSettings->mMotionPointsSettings.mEnabled = enable;
+      }));
+  mPluginSettings->mMotionPointsSettings.mEnabled.connectAndTouch(
+      [this](bool enable) { mGuiManager->setCheckboxValue("motionPoints.setEnabled", enable); });
+
+  mGuiManager->getGui()->registerCallback(
+      "motionPoints.setCount", "Number of motion points.", std::function([this](double value) {
+        mPluginSettings->mMotionPointsSettings.mCount = static_cast<int>(value);
+      }));
+  mPluginSettings->mMotionPointsSettings.mCount.connectAndTouch(
+      [this](int value) { mGuiManager->setSliderValue("motionPoints.setCount", value); });
+
+  mGuiManager->getGui()->registerCallback("motionPoints.setRadius",
+      "Radius of the motion point sphere.", std::function([this](double value) {
+        mPluginSettings->mMotionPointsSettings.mRadius = static_cast<float>(value);
+      }));
+  mPluginSettings->mMotionPointsSettings.mRadius.connectAndTouch(
+      [this](float value) { mGuiManager->setSliderValue("motionPoints.setRadius", value); });
+
+  mGuiManager->getGui()->registerCallback("motionPoints.setSize",
+      "World-space size of motion points.", std::function([this](double value) {
+        mPluginSettings->mMotionPointsSettings.mSize = static_cast<float>(value);
+      }));
+  mPluginSettings->mMotionPointsSettings.mSize.connectAndTouch(
+      [this](float value) { mGuiManager->setSliderValue("motionPoints.setSize", value); });
+
+  mGuiManager->getGui()->registerCallback("motionPoints.setColor", "Color of the motion points.",
+      std::function(
+          [this](std::string value) { mPluginSettings->mMotionPointsSettings.mColor = value; }));
+  mPluginSettings->mMotionPointsSettings.mColor.connectAndTouch([this](std::string value) {
+    mGuiManager->getGui()->callJavascript("CosmoScout.motionPoints.setColorValue", value);
+  });
+
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////
   // SETTINGS FOR VIRTUAL HORIZON
@@ -392,12 +455,19 @@ void Plugin::deInit() {
   // remove settings tab
   mGuiManager->removeSettingsSection("VR Accessibility");
 
+  mGuiManager->getGui()->callJavascript("CosmoScout.removeApi", "motionPoints");
   mGuiManager->getGui()->callJavascript("CosmoScout.removeApi", "virtualHorizon");
   mGuiManager->getGui()->callJavascript("CosmoScout.removeApi", "crosshair");
   mGuiManager->getGui()->callJavascript("CosmoScout.removeApi", "floorGrid");
   mGuiManager->getGui()->callJavascript("CosmoScout.removeApi", "fovVignette");
 
   // remove callbacks
+  //motionPoints
+  mGuiManager->getGui()->unregisterCallback("motionPoints.setEnabled");
+  mGuiManager->getGui()->unregisterCallback("motionPoints.setCount");
+  mGuiManager->getGui()->unregisterCallback("motionPoints.setRadius");
+  mGuiManager->getGui()->unregisterCallback("motionPoints.setSize");
+  mGuiManager->getGui()->unregisterCallback("motionPoints.setColor");
   //virtualHorizon
   mGuiManager->getGui()->unregisterCallback("virtualHorizon.setEnabled");
   mGuiManager->getGui()->unregisterCallback("virtualHorizon.setSize");
@@ -457,6 +527,9 @@ void Plugin::update() {
   }
 
   // trigger update method in other parts of the plugin, if they are enabled
+  //TODO remove? if (mPluginSettings->mMotionPointsSettings.mEnabled.get()) {
+  //TODO remove?   mMotionPoints->update();
+  //TODO remove? }
   if (mPluginSettings->mVirtualHorizonSettings.mEnabled.get()) {
     mVirtualHorizon->update();
   }
@@ -481,6 +554,11 @@ void Plugin::update() {
 void Plugin::onLoad() {
   // Read settings from JSON.
   from_json(mAllSettings->mPlugins.at("csp-vr-accessibility"), *mPluginSettings);
+
+  // Create & configure MotionPointField
+  mMotionPoints =
+      std::make_shared<MotionPointField>(mSolarSystem, mPluginSettings->mMotionPointsSettings);
+
 
     // Create & configure VirtualHorizon
   mVirtualHorizon =

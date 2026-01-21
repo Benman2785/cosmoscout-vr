@@ -8,6 +8,71 @@
 (() => {
 
     /**
+ * ////////////////////////////////////////////////////////////////////////////////////////////////////
+ * Motion Points Api
+ */
+    class MotionPointsApi extends IApi {
+        /**
+         * @inheritDoc
+         */
+        name = 'motionPoints';
+        picker;
+
+        /**
+         * @inheritDoc
+         */
+        init() {
+            CosmoScout.gui.initSlider("motionPoints.setCount", 0, 3000, 50, [500]);
+            CosmoScout.gui.initSlider("motionPoints.setRadius", 0.5, 50.0, 0.5, [5.0]);
+            CosmoScout.gui.initSlider("motionPoints.setSize", 0.5, 20.0, 0.5, [4.0]);
+
+            this.picker = document.querySelector('#motionPoints-setColor');
+
+            this.picker.picker = new CP(this.picker);
+            this.picker.picker.self.classList.add('no-alpha');
+
+            this.picker.picker.on('drag', (r, g, b, a) => {
+                const color = CP.HEX([r, g, b, 1]);
+                this.picker.style.background = color;
+                this.picker.value = color;
+
+                CosmoScout.callbacks.motionPoints.setColor(color);
+            });
+
+            this.picker.oninput = (e) => {
+                const color = CP.HEX(e.target.value);
+                this.picker.picker.set(color[0], color[1], color[2], 1);
+                this.picker.style.background = CP.HEX([color[0], color[1], color[2], 1]);
+
+                CosmoScout.callbacks.motionPoints.setColor(e.target.value);
+            };
+        }
+
+        setEnabledValue(value) {
+            document.querySelector('#motionPoints-enabled').checked = value;
+        }
+
+        setCountValue(value) {
+            document.querySelector('#motionPoints-setCount').value = value;
+        }
+
+        setRadiusValue(value) {
+            document.querySelector('#motionPoints-setRadius').value = value;
+        }
+
+        setSizeValue(value) {
+            document.querySelector('#motionPoints-setSize').value = value;
+        }
+
+        setColorValue(color) {
+            this.picker.picker.set(CP.HEX(color));
+            this.picker.style.background = color;
+            this.picker.value = color;
+        }
+    }
+
+
+    /**
     * ////////////////////////////////////////////////////////////////////////////////////////////////////
     * VirtualHorizon Api
     */
@@ -190,5 +255,11 @@
    * ////////////////////////////////////////////////////////////////////////////////////////////////////
    * INITIALIZATION
    */
-    CosmoScout.init(VirtualHorizonApi, CrosshairApi, FloorGridApi, FovVignetteApi);
+    CosmoScout.init(
+        VirtualHorizonApi,
+        CrosshairApi,
+        FloorGridApi,
+        MotionPointsApi,
+        FovVignetteApi
+    );
 })();

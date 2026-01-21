@@ -14,6 +14,7 @@
 
 namespace csp::vraccessibility {
 
+class MotionPointField;
 class VirtualHorizon;
 class Crosshair;
 class FloorGrid;
@@ -25,6 +26,29 @@ class FovVignette;
 class Plugin : public cs::core::PluginBase {
  public:
   struct Settings {
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct MotionPoints {
+      /// Toggle, whether the motionPoints is hidden (false) or visible (true).
+      cs::utils::DefaultProperty<bool> mEnabled{true};
+
+      /// How many points should get spawned
+      cs::utils::DefaultProperty<int> mCount{500};
+
+      /// Radius around the Observer in which to spawn the points
+      cs::utils::DefaultProperty<float> mRadius{5.0F};
+
+      /// How big the points should be
+      cs::utils::DefaultProperty<float> mSize{4.0F};
+
+      /// Transparency
+      cs::utils::DefaultProperty<float> mAlpha{1.0F};
+
+      /// Color
+      cs::utils::DefaultProperty<std::string> mColor{"#ffffff"};
+    };
+    MotionPoints mMotionPointsSettings;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -168,11 +192,12 @@ class Plugin : public cs::core::PluginBase {
  private:
   void onLoad();
 
-  std::shared_ptr<Settings>    mPluginSettings = std::make_shared<Settings>();
+  std::shared_ptr<Settings>         mPluginSettings = std::make_shared<Settings>();
+  std::shared_ptr<MotionPointField> mMotionPoints;
   std::shared_ptr<VirtualHorizon>   mVirtualHorizon;
-  std::shared_ptr<Crosshair>   mCrosshair;
-  std::shared_ptr<FloorGrid>   mGrid;
-  std::shared_ptr<FovVignette> mVignette;
+  std::shared_ptr<Crosshair>        mCrosshair;
+  std::shared_ptr<FloorGrid>        mGrid;
+  std::shared_ptr<FovVignette>      mVignette;
 
   bool resetColorPicker{true};
 
