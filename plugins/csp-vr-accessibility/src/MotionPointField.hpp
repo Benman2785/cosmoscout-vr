@@ -17,6 +17,7 @@
 
 #include <memory>
 #include <vector>
+#include <random>
 
 namespace cs::core {
 class SolarSystem;
@@ -45,6 +46,14 @@ class MotionPointField : public IVistaOpenGLDraw {
   void      updatePoints();
   glm::vec3 randomPointInSphere();
 
+  // Um Änderungen zu erkennen
+  int   mLastCount  = 0;
+  float mLastRadius = 0.0f;
+
+  // Zufallsgenerator für Runtime-Reseeding behalten
+  std::mt19937                          mRng;
+  std::uniform_real_distribution<float> mDist;
+
   // -----------------------------------------------------------------------------------------------
 
   std::shared_ptr<cs::core::SolarSystem> mSolarSystem;
@@ -52,12 +61,9 @@ class MotionPointField : public IVistaOpenGLDraw {
 
   std::vector<glm::vec3> mPoints;
 
-  int   mLastPointCount = -1;
-  float mLastRadius     = -1.0f;
-
   // OpenGL
-  VistaBufferObject mVBO;
-  VistaVertexArrayObject  mVAO;
+  VistaBufferObject      mVBO;
+  VistaVertexArrayObject mVAO;
   VistaGLSLShader        mShader;
 
   struct {
