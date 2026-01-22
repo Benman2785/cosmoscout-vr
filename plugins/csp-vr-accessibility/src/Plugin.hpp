@@ -15,8 +15,8 @@
 namespace csp::vraccessibility {
 
 class MotionPointField;
-class VirtualHorizon;
 class Crosshair;
+class VirtualHorizon;
 class FloorGrid;
 class FovVignette;
 
@@ -52,27 +52,27 @@ class Plugin : public cs::core::PluginBase {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    struct VirtualHorizon {
-      /// Toggle, whether the virtualHorizon is hidden (false) or visible (true).
+    struct Crosshair {
+      /// Toggle, whether the crosshair is hidden (false) or visible (true).
       cs::utils::DefaultProperty<bool> mEnabled{true};
 
-      /// The scale of the virtualHorizon texture.
+      /// The scale of the crosshair texture.
       cs::utils::DefaultProperty<float> mSize{0.5F};
 
-      /// The height offset to adjust the virtualHorizon to the floor.
+      /// The height offset to adjust the crosshair to the floor.
       cs::utils::DefaultProperty<float> mOffset{-1.8F};
 
-      /// The size of the virtualHorizon.
+      /// The size of the crosshair.
       cs::utils::DefaultProperty<float> mExtent{10.0F};
 
-      /// The texture used for the virtualHorizon (b/w texture).
+      /// The texture used for the crosshair (b/w texture).
       cs::utils::DefaultProperty<std::string> mTexture{
-          "../share/resources/textures/virtualHorizonLarge.png"};
+          "../share/resources/textures/crosshairLarge.png"};
 
-      /// The opacity of the virtualHorizon (default: 1, fully opaque, to 0, fully transparent).
+      /// The opacity of the crosshair (default: 1, fully opaque, to 0, fully transparent).
       cs::utils::DefaultProperty<float> mAlpha{1.0F};
 
-      /// The color of the virtualHorizon.
+      /// The color of the crosshair.
       cs::utils::DefaultProperty<std::string> mColor{"#FFFFFF"};
 
       /// The Vector3 Direction, the Observer is moving in.
@@ -84,27 +84,27 @@ class Plugin : public cs::core::PluginBase {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    struct Crosshair {
-      /// Toggle, whether the crosshair is hidden (false) or visible (true).
+    struct VirtualHorizon {
+      /// Toggle, whether the virtualHorizon is hidden (false) or visible (true).
       cs::utils::DefaultProperty<bool> mEnabled{true};
 
-      /// The scale of the crosshair texture.
+      /// The scale of the virtualHorizon texture.
       cs::utils::DefaultProperty<float> mSize{0.5F};
 
-      /// The offset to adjust the crosshair away from the observer.
+      /// The offset to adjust the virtualHorizon away from the observer.
       cs::utils::DefaultProperty<float> mOffset{-1.8F};
 
-      /// The size of the crosshair.
+      /// The size of the virtualHorizon.
       cs::utils::DefaultProperty<float> mExtent{10.0F};
 
-      /// The texture used for the crosshair (b/w texture).
+      /// The texture used for the virtualHorizon (b/w texture).
       cs::utils::DefaultProperty<std::string> mTexture{
-          "../share/resources/textures/CrosshairLarge.png"};
+          "../share/resources/textures/VirtualHorizonLarge.png"};
 
-      /// The opacity of the crosshair (default: 1, fully opaque, to 0, fully transparent).
+      /// The opacity of the virtualHorizon (default: 1, fully opaque, to 0, fully transparent).
       cs::utils::DefaultProperty<float> mAlpha{1.0F};
 
-      /// The color of the crosshair.
+      /// The color of the virtualHorizon.
       cs::utils::DefaultProperty<std::string> mColor{"#FFFFFF"};
     };
 
@@ -169,11 +169,11 @@ class Plugin : public cs::core::PluginBase {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    /// The container for the VirtualHorizon Settings
-    Plugin::Settings::VirtualHorizon mVirtualHorizonSettings;
-
     /// The container for the Crosshair Settings
     Plugin::Settings::Crosshair mCrosshairSettings;
+
+    /// The container for the VirtualHorizon Settings
+    Plugin::Settings::VirtualHorizon mVirtualHorizonSettings;
 
     /// The container for the Grid Settings
     Plugin::Settings::Grid mGridSettings;
@@ -194,8 +194,8 @@ class Plugin : public cs::core::PluginBase {
 
   std::shared_ptr<Settings>         mPluginSettings = std::make_shared<Settings>();
   std::shared_ptr<MotionPointField> mMotionPoints;
-  std::shared_ptr<VirtualHorizon>   mVirtualHorizon;
   std::shared_ptr<Crosshair>        mCrosshair;
+  std::shared_ptr<VirtualHorizon>   mVirtualHorizon;
   std::shared_ptr<FloorGrid>        mGrid;
   std::shared_ptr<FovVignette>      mVignette;
 

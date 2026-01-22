@@ -8,9 +8,9 @@
 #include "VirtualHorizon.hpp"
 
 #include "../../../src/cs-core/SolarSystem.hpp"
-#include "../../../src/cs-graphics/TextureLoader.hpp"
-#include "../../../src/cs-scene/CelestialObject.hpp"
 #include "../../../src/cs-scene/CelestialObserver.hpp"
+#include "../../../src/cs-scene/CelestialObject.hpp"
+#include "../../../src/cs-graphics/TextureLoader.hpp"
 #include "../../../src/cs-utils/FrameStats.hpp"
 #include "logger.hpp"
 
@@ -32,46 +32,25 @@ namespace csp::vraccessibility {
 const char* VirtualHorizon::VERT_SHADER = R"(
 #version 330
 
-uniform mat4 uMatModelView;
-uniform mat4 uMatProjection;
+uniform mat4  uMatModelView;
+uniform mat4  uMatProjection;
 uniform float uExtent;
 uniform float uSize;
-uniform vec3 uObserverDir; 
-uniform vec3 uPlanetUp;
 
+// inputs
 layout(location = 0) in vec2 iQuadPos;
-out vec2 vTexCoords;
+
+// outputs
+out vec2  vTexCoords;
 
 void main() {
+  // Convert iQuadPos from [-1, 1] to [0, 1] for texture sampling
+  vTexCoords  = (iQuadPos + 1.0) / 2.0;
 
-  vTexCoords = (iQuadPos + 1.0) * 0.5;
-
-  // --- Compute PITCH angle only ---
-  // Clamp dot to avoid NaNs
-  float d = clamp(dot(normalize(uObserverDir), normalize(uPlanetUp)), -1.0, 1.0);
-
-  // pitch: positive when climbing, negative when descending
-  float pitch = asin(d);
-
-  // --- Rotate quad ONLY around local X-axis ---
-  float c = cos(pitch);
-  float s = sin(pitch);
-
-  mat3 rot = mat3(
-    1.0, 0.0, 0.0,
-    0.0,    c,   -s,
-    0.0,    s,    c
-  );
-
-  // Base position (in camera space)
-  vec3 basePos = vec3(iQuadPos.x * uSize * 10, iQuadPos.y * uSize * 10, -15.0 * uExtent);
-
-  // Apply rotation
-  vec3 rotatedPos = rot * basePos;
-
-  // Transform to clip space
-  vec3 pos = (uMatModelView * vec4(rotatedPos, 1.0)).xyz;
-  gl_Position = uMatProjection * vec4(pos, 1.0);
+  // Place quad on xy-axis, in front (negative z-axis) of the observer
+  vec4 quadPos= vec4(iQuadPos.x * uSize * 10, iQuadPos.y * uSize * 10, -12.5 * uExtent, 1.0);
+  vec3 pos    = (uMatModelView * quadPos).xyz;
+  gl_Position = uMatProjection * vec4(pos, 1);
 }
 )";
 
@@ -96,13 +75,14 @@ void main() {
   oColor = texture(uTexture, vTexCoords).rgb;
   oColor *= uCustomColor.rgb;
   oColor *= uAlpha;
+  //oColor *= 1 - clamp(length(vTexCoords), 0, 1);
 })";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Constructor
-VirtualHorizon::VirtualHorizon(std::shared_ptr<cs::core::SolarSystem> solarSystem,
-    Plugin::Settings::VirtualHorizon&                                 virtualHorizonSettings)
+//Constructor
+VirtualHorizon::VirtualHorizon(
+    std::shared_ptr<cs::core::SolarSystem> solarSystem, Plugin::Settings::VirtualHorizon& virtualHorizonSettings)
     : mSolarSystem(std::move(solarSystem))
     , mVirtualHorizonSettings(virtualHorizonSettings) {
 
@@ -133,8 +113,6 @@ VirtualHorizon::VirtualHorizon(std::shared_ptr<cs::core::SolarSystem> solarSyste
   mUniforms.size             = mShader.GetUniformLocation("uSize");
   mUniforms.alpha            = mShader.GetUniformLocation("uAlpha");
   mUniforms.color            = mShader.GetUniformLocation("uCustomColor");
-  mUniforms.observerDir      = mShader.GetUniformLocation("uObserverDir");
-  mUniforms.planetUp         = mShader.GetUniformLocation("uPlanetUp");
 
   // Load Texture
   mTexture = cs::graphics::TextureLoader::loadFromFile(virtualHorizonSettings.mTexture.get());
@@ -157,7 +135,7 @@ VirtualHorizon::VirtualHorizon(std::shared_ptr<cs::core::SolarSystem> solarSyste
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Destructor
+//Destructor
 VirtualHorizon::~VirtualHorizon() {
   // remove Nodes from GUI
   auto* platform = GetVistaSystem()
@@ -190,14 +168,10 @@ void VirtualHorizon::update() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool VirtualHorizon::Do() {
-  auto const& mObserver           = mSolarSystem->getObserver();
-  auto        dir                 = mObserver.getVelocityDirection();
-  auto        speed               = mObserver.getVelocityMagnitude();
-  glm::dvec3  nearestPlanetPos    = mObserver.getClosestPlanetToObserverPosition();
-  glm::dvec3  nearestPlanetNormal = glm::normalize(nearestPlanetPos);
-  // to be used by the shader:
-  glm::vec3 observerDirF = glm::vec3(dir);
-  glm::vec3 planetUpF    = glm::vec3(nearestPlanetNormal);
+  //TODO get Direction info into: mSolarSystem->getObserver();
+  auto const& mObserver = mSolarSystem->getObserver();
+  auto        dir       = mObserver.getVelocityDirection();
+  auto        speed     = mObserver.getVelocityMagnitude();
 
   if (!std::isfinite(dir.x) || !std::isfinite(dir.y) || !std::isfinite(dir.z)) {
     logger().error("NaN detected in dir!");
@@ -206,6 +180,9 @@ bool VirtualHorizon::Do() {
   if (!std::isfinite(speed)) {
     logger().error("NaN detected in speed!");
   }
+
+
+  //logger().info("Observer moving towards: ({}, {}, {}), speed: {}", dir.x, dir.y, dir.z, speed);
 
   // do nothing if virtualHorizon is disabled
   if (!mVirtualHorizonSettings.mEnabled.get()) {
@@ -232,11 +209,6 @@ bool VirtualHorizon::Do() {
   mShader.SetUniform(mUniforms.extent, mVirtualHorizonSettings.mExtent.get());
   mShader.SetUniform(mUniforms.size, mVirtualHorizonSettings.mSize.get());
   mShader.SetUniform(mUniforms.alpha, mVirtualHorizonSettings.mAlpha.get());
-
-  // Vectors used for calculating the rotation of the virtual horizon in the vertex shader
-  glUniform3fv(mUniforms.observerDir, 1, glm::value_ptr(observerDirF));
-  glUniform3fv(mUniforms.planetUp, 1, glm::value_ptr(planetUpF));
-  // Color Vector
   glUniform4fv(mUniforms.color, 1,
       glm::value_ptr(Plugin::GetColorFromHexString(mVirtualHorizonSettings.mColor.get())));
 
@@ -254,7 +226,7 @@ bool VirtualHorizon::Do() {
   glPushAttrib(GL_ENABLE_BIT | GL_BLEND | GL_DEPTH_BUFFER_BIT);
   glEnable(GL_BLEND);
   glBlendFunc(GL_ONE, GL_ONE); // turns black-mask texture into alpha (technically not correct)
-
+  
   // Disable depth test -> always draw on top
   glDisable(GL_DEPTH_TEST);
   glDepthMask(false);

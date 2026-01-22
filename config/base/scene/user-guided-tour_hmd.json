@@ -1659,7 +1659,7 @@
     },
     "csp-vr-accessibility": {
       "motionPoints": {
-        "enabled": true,
+        "enabled": false,
         "count": 250,
         "radius": 10.0,
         "size": 10.0,

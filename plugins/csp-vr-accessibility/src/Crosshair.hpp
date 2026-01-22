@@ -65,6 +65,8 @@ class Crosshair : public IVistaOpenGLDraw {
   VistaVertexArrayObject        mVAO;
   VistaBufferObject             mVBO;
 
+  glm::vec3 lastObserverDir = glm::uvec3(0, 0, -1);
+
   struct {
     uint32_t modelViewMatrix  = 0;
     uint32_t projectionMatrix = 0;
@@ -73,6 +75,9 @@ class Crosshair : public IVistaOpenGLDraw {
     uint32_t size             = 0;
     uint32_t alpha            = 0;
     uint32_t color            = 0;
+    uint32_t observerDir      = 0; // normalized direction of flight
+    uint32_t planetUp         = 0; // normalized up vector from planet surface
+    uint32_t viewDir          = 0;
   } mUniforms;
 
   static const char* VERT_SHADER;
