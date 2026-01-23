@@ -19,6 +19,7 @@ class Crosshair;
 class VirtualHorizon;
 class FloorGrid;
 class FovVignette;
+class ViewOffset;
 
 /// This plugin adds VR accessibility options like a floor grid and a FoV vignette.
 /// The configuration of this plugin is done via the provided json config.
@@ -26,6 +27,16 @@ class FovVignette;
 class Plugin : public cs::core::PluginBase {
  public:
   struct Settings {
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct ViewOffset {
+      /// Toggle, whether the pitch correction is applied or not
+      cs::utils::Property<bool>   mEnabled = false;
+      /// How many rotation degrees the view pitch should get tilted
+      cs::utils::Property<double> mPitch   = 0.0;
+    };
+    ViewOffset mViewOffsetSettings;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -198,6 +209,7 @@ class Plugin : public cs::core::PluginBase {
   std::shared_ptr<VirtualHorizon>   mVirtualHorizon;
   std::shared_ptr<FloorGrid>        mGrid;
   std::shared_ptr<FovVignette>      mVignette;
+  std::shared_ptr<ViewOffset>       mViewOffsetSettings;
 
   bool resetColorPicker{true};
 

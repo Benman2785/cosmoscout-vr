@@ -8,6 +8,27 @@
 (() => {
 
     /**
+     * ////////////////////////////////////////////////////////////////////////////////////////////////////
+     * View Offset Api (Icaros Pitch)
+     */
+    class ViewOffsetApi extends IApi {
+        /**
+         * @inheritDoc
+         */
+        name = 'viewOffset';
+
+        /**
+         * @inheritDoc
+         */
+        init() {
+            // Initialisiert den Slider.
+            // Parameter: Name des Callbacks, Min, Max, Step, [Standardwert]
+            // Wir erlauben -90 bis +90 Grad.
+            CosmoScout.gui.initSlider("viewOffset.setPitch", -90, 90, 1, [0]);
+        }
+    }
+
+    /**
  * ////////////////////////////////////////////////////////////////////////////////////////////////////
  * Motion Points Api
  */
@@ -260,6 +281,7 @@
         CrosshairApi,
         FloorGridApi,
         MotionPointsApi,
-        FovVignetteApi
+        FovVignetteApi,
+        ViewOffsetApi
     );
 })();

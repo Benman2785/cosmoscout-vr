@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//                               This file is part of CosmoScout VR                               //
+//                              This file is part of CosmoScout VR                                //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // SPDX-FileCopyrightText: German Aerospace Center (DLR) <cosmoscout@dlr.de>
@@ -20,6 +20,7 @@
 #include "FloorGrid.hpp"
 #include "FovVignette.hpp"
 #include "MotionPointField.hpp"
+#include "ViewOffset.hpp"
 #include "logger.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -60,7 +61,7 @@ void to_json(nlohmann::json& j, Plugin::Settings::MotionPoints const& o) {
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// TO & FROM JSON OF VIRTUAL HORIZON
+// TO & FROM JSON OF CROSSHAIR
 void from_json(nlohmann::json const& j, Plugin::Settings::Crosshair& o) {
   cs::core::Settings::deserialize(j, "enabled", o.mEnabled);
   cs::core::Settings::deserialize(j, "size", o.mSize);
@@ -86,7 +87,7 @@ void to_json(nlohmann::json& j, Plugin::Settings::Crosshair const& o) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// TO & FROM JSON OF CROSSHAIR 
+// TO & FROM JSON OF VIRTUAL HORIZON 
 void from_json(nlohmann::json const& j, Plugin::Settings::VirtualHorizon& o) {
   cs::core::Settings::deserialize(j, "enabled", o.mEnabled);
   cs::core::Settings::deserialize(j, "size", o.mSize);
@@ -156,6 +157,18 @@ void to_json(nlohmann::json& j, Plugin::Settings::Vignette const& o) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+// TO & FROM JSON OF VIEW OFFSET (NEU)
+void from_json(nlohmann::json const& j, Plugin::Settings::ViewOffset& o) {
+  cs::core::Settings::deserialize(j, "enabled", o.mEnabled);
+  cs::core::Settings::deserialize(j, "pitch", o.mPitch);
+}
+
+void to_json(nlohmann::json& j, Plugin::Settings::ViewOffset const& o) {
+  cs::core::Settings::serialize(j, "enabled", o.mEnabled);
+  cs::core::Settings::serialize(j, "pitch", o.mPitch);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void from_json(nlohmann::json const& j, Plugin::Settings& o) {
   cs::core::Settings::deserialize(j, "motionPoints", o.mMotionPointsSettings);
@@ -163,6 +176,7 @@ void from_json(nlohmann::json const& j, Plugin::Settings& o) {
   cs::core::Settings::deserialize(j, "virtualHorizon", o.mVirtualHorizonSettings);
   cs::core::Settings::deserialize(j, "grid", o.mGridSettings);
   cs::core::Settings::deserialize(j, "vignette", o.mVignetteSettings);
+  cs::core::Settings::deserialize(j, "viewOffset", o.mViewOffsetSettings);
 }
 
 void to_json(nlohmann::json& j, Plugin::Settings const& o) {
@@ -171,6 +185,7 @@ void to_json(nlohmann::json& j, Plugin::Settings const& o) {
   cs::core::Settings::serialize(j, "virtualHorizon", o.mVirtualHorizonSettings);
   cs::core::Settings::serialize(j, "grid", o.mGridSettings);
   cs::core::Settings::serialize(j, "vignette", o.mVignetteSettings);
+  cs::core::Settings::serialize(j, "viewOffset", o.mViewOffsetSettings);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -438,6 +453,30 @@ void Plugin::init() {
   mPluginSettings->mVignetteSettings.mFadeDeadzone.connectAndTouch(
       [this](double value) { mGuiManager->setSliderValue("fovVignette.setDeadzone", value); });
 
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+  // SETTINGS FOR VIEW OFFSET (NEU)
+
+  mGuiManager->getGui()->registerCallback("viewOffset.setEnabled",
+      "Enables or disables the view pitch offset.",
+      std::function([this](bool enable) {
+        mPluginSettings->mViewOffsetSettings.mEnabled = enable;
+        // Sofort anwenden
+        mViewOffsetSettings->configure(mPluginSettings->mViewOffsetSettings);
+      }));
+  mPluginSettings->mViewOffsetSettings.mEnabled.connectAndTouch(
+      [this](bool enable) { mGuiManager->setCheckboxValue("viewOffset.setEnabled", enable); });
+
+  mGuiManager->getGui()->registerCallback("viewOffset.setPitch",
+      "Sets the pitch offset in degrees.",
+      std::function([this](double value) {
+        mPluginSettings->mViewOffsetSettings.mPitch = value;
+        // Sofort anwenden
+        mViewOffsetSettings->configure(mPluginSettings->mViewOffsetSettings);
+      }));
+  mPluginSettings->mViewOffsetSettings.mPitch.connectAndTouch(
+      [this](double value) { mGuiManager->setSliderValue("viewOffset.setPitch", value); });
+
+
   // Load settings.
   onLoad();
 
@@ -460,6 +499,8 @@ void Plugin::deInit() {
   mGuiManager->getGui()->callJavascript("CosmoScout.removeApi", "virtualHorizon");
   mGuiManager->getGui()->callJavascript("CosmoScout.removeApi", "floorGrid");
   mGuiManager->getGui()->callJavascript("CosmoScout.removeApi", "fovVignette");
+  // viewOffset API entfernen (falls in JS angelegt)
+  // mGuiManager->getGui()->callJavascript("CosmoScout.removeApi", "viewOffset"); 
 
   // remove callbacks
   //motionPoints
@@ -496,6 +537,9 @@ void Plugin::deInit() {
   mGuiManager->getGui()->unregisterCallback("fovVignette.setVelocityThresholds");
   mGuiManager->getGui()->unregisterCallback("fovVignette.setDuration");
   mGuiManager->getGui()->unregisterCallback("fovVignette.setDeadzone");
+  //viewOffset
+  mGuiManager->getGui()->unregisterCallback("viewOffset.setEnabled");
+  mGuiManager->getGui()->unregisterCallback("viewOffset.setPitch");
 
   mAllSettings->onLoad().disconnect(mOnLoadConnection);
   mAllSettings->onSave().disconnect(mOnSaveConnection);
@@ -547,6 +591,9 @@ void Plugin::update() {
       mVignette->updateFadeAnimatedVignette();
     }
   }
+
+  // ViewOffset benötigt kein Update pro Frame, da es statisch ist.
+  // mViewOffsetSettings->update(); 
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -576,6 +623,10 @@ void Plugin::onLoad() {
   // Create & configure FovVignette
   mVignette = std::make_shared<FovVignette>(mSolarSystem, mPluginSettings->mVignetteSettings);
   mVignette->configure(mPluginSettings->mVignetteSettings);
+
+  // Create & configure ViewOffset
+  mViewOffsetSettings = std::make_shared<ViewOffset>(mPluginSettings->mViewOffsetSettings);
+  mViewOffsetSettings->configure(mPluginSettings->mViewOffsetSettings);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

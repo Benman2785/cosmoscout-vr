@@ -3,6 +3,30 @@ SPDX-FileCopyrightText: German Aerospace Center (DLR) <cosmoscout@dlr.de>
 SPDX-License-Identifier: MIT
 -->
 
+<!-- VIEW PITCH OFFSET -->
+
+<div class="row mt-2">
+  <div class="col-12">
+    <div class="d-flex align-items-center justify-content-between">
+      <label class="mb-0">Icaros Pitch Offset</label>
+      <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" 
+               data-callback="viewOffset.setEnabled">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    <label class="text-muted small">Neigungswinkel (Grad)</label>
+    <div data-callback="viewOffset.setPitch" 
+         data-min="-90" data-max="90" data-step="1" class="simple-slider">
+    </div>
+  </div>
+</div>
+<hr>
+
 <!-- MOTION POINTS -->
 
 <hr class="my-3">

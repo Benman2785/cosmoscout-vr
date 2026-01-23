@@ -295,6 +295,7 @@
   "spiceKernel": "../share/config/spice/simple.txt",
   "graphics": {
     "heightScale": 20,
+    "viewPitchOffset": 30,
     "eclipseShadowMaps": {
       "Earth": {},
       "Moon": {},
@@ -803,10 +804,10 @@
           "activeImgDataset": "Blue Marble",
           "activeDemDataset": "ETOPO1",
           "imgDatasets": {
-            "Blue Marble": {
+            "Viking": {
               "copyright": "NASA",
               "url": "http://localhost:8080/cgi-bin/mapserv?map=/mapserver-datasets/meta.map&service=wms",
-              "layers": "earth.bluemarble.rgb",
+              "layers": "mars.viking.rgb",
               "maxLevel": 6
             }
           },
@@ -1658,6 +1659,10 @@
       }
     },
     "csp-vr-accessibility": {
+      "viewOffset": {
+        "enabled": true,
+        "pitch": 30.0
+    },
       "motionPoints": {
         "enabled": false,
         "count": 250,
