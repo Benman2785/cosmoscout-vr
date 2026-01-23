@@ -53,6 +53,10 @@ class Crosshair : public IVistaOpenGLDraw {
   bool GetBoundingBox(VistaBoundingBox& bb) override;
 
  private:
+  double     mLastTime    = 0.0;
+  glm::dvec3 mLastForward = glm::dvec3(0.0, 0.0, -1.0);
+  float      mCurrentRoll = 0.0F;
+
   std::shared_ptr<cs::core::Settings>    mSettings;
   std::shared_ptr<cs::core::SolarSystem> mSolarSystem;
 
@@ -68,16 +72,16 @@ class Crosshair : public IVistaOpenGLDraw {
   glm::vec3 lastObserverDir = glm::uvec3(0, 0, -1);
 
   struct {
-    uint32_t modelViewMatrix  = 0;
-    uint32_t projectionMatrix = 0;
-    uint32_t texture          = 0;
-    uint32_t extent           = 0;
-    uint32_t size             = 0;
-    uint32_t alpha            = 0;
-    uint32_t color            = 0;
-    uint32_t observerDir      = 0; // normalized direction of flight
-    uint32_t planetUp         = 0; // normalized up vector from planet surface
-    uint32_t viewDir          = 0;
+    GLint modelViewMatrix  = -1;
+    GLint projectionMatrix = -1;
+    GLint texture          = -1;
+    GLint extent           = -1;
+    GLint size             = -1;
+    GLint alpha            = -1;
+    GLint color            = -1;
+    GLint observerDir      = -1;
+    GLint planetUp         = -1;
+    GLint roll             = -1;
   } mUniforms;
 
   static const char* VERT_SHADER;
