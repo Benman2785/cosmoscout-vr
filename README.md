@@ -1,7 +1,7 @@
 <p align="center"> 
   <img src ="resources/logo/large.svg" />
 </p>
-For general information about Cosmoscout please refer to the origin [repository](https://github.com/cosmoscout/cosmoscout-vr).
+For general information about Cosmoscout please refer to the origin [repository](https://github.com/cosmoscout/cosmoscout-vr) .
 
 # Purpose
 
