@@ -37,9 +37,9 @@ uniform mat4 uMatProjection;
 uniform float uExtent;
 uniform float uSize;
 
-uniform vec3 uObserverDir; // Flugrichtung
-uniform vec3 uPlanetUp;    // Oben
-uniform float uRoll;       // Der berechnete Roll-Winkel
+uniform vec3 uObserverDir;
+uniform vec3 uPlanetUp;
+uniform float uRoll; 
 
 layout(location = 0) in vec2 iQuadPos;
 out vec2 vTexCoords;
@@ -55,36 +55,54 @@ void main() {
   float d = clamp(dot(velocity, planetUp), -1.0, 1.0);
   float pitch = -asin(d);
 
-  // --- 2. ROLL (wird direkt übergeben) ---
+  // --- 2. ROLL / YAW ---
   float roll = uRoll;
 
-  // --- 3. ROTATIONSMATRIZEN ---
+  // --- 3. MATRIZEN ---
 
-  // Rotation um X (Pitch)
+  // A) Pitch Matrix
   float cp = cos(pitch);
   float sp = sin(pitch);
-  mat3 rotX = mat3(
+  mat3 rotPitch = mat3(
     1.0, 0.0, 0.0,
     0.0,  cp, -sp,
     0.0,  sp,  cp
   );
 
-  // Rotation um Z (Roll)
+  // B) Yaw Matrix (Position)
+  // WICHTIG: -roll für korrekte Links/Rechts Bewegung
+  float cy = cos(-roll);
+  float sy = sin(-roll);
+  mat3 rotPosYaw = mat3(
+     cy, 0.0, -sy, 
+    0.0, 1.0, 0.0,
+     sy, 0.0,  cy
+  );
+
+  // C) Tilt Matrix (Grafik Neigung)
   float cr = cos(roll);
   float sr = sin(roll);
-  mat3 rotZ = mat3(
+  mat3 rotTilt = mat3(
      cr, -sr, 0.0,
      sr,  cr, 0.0,
     0.0, 0.0, 1.0
   );
 
-  // Basis-Position
-  vec3 basePos = vec3(iQuadPos.x * uSize * 10, iQuadPos.y * uSize * 10, -15.0 * uExtent);
+  // --- 4. BERECHNUNG ---
 
-  // Erst Pitch, dann Roll
-  vec3 rotatedPos = rotZ * (rotX * basePos);
+  vec3 centerBase = vec3(0.0, 0.0, -15.0 * uExtent);
+  
+  // Erst Pitch (Höhe), dann Yaw (Seite)
+  vec3 centerPos = rotPosYaw * (rotPitch * centerBase);
 
-  vec3 pos = (uMatModelView * vec4(rotatedPos, 1.0)).xyz;
+  // Quad orientieren
+  vec3 quadOffset = vec3(iQuadPos.x * uSize * 7, iQuadPos.y * uSize * 7, 0.0);
+  vec3 tiltedOffset = rotTilt * quadOffset;
+
+  // Summe
+  vec3 finalPos = centerPos + tiltedOffset;
+
+  vec3 pos = (uMatModelView * vec4(finalPos, 1.0)).xyz;
   gl_Position = uMatProjection * vec4(pos, 1.0);
 }
 )";
@@ -115,11 +133,10 @@ void main() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Crosshair::Crosshair(std::shared_ptr<cs::core::SolarSystem> solarSystem,
-                     Plugin::Settings::Crosshair&             crosshairSettings)
+    Plugin::Settings::Crosshair&                            crosshairSettings)
     : mSolarSystem(std::move(solarSystem))
     , mCrosshairSettings(crosshairSettings) {
 
-  // Create initial Quad
   std::array<glm::vec2, 4> vertices{};
   vertices[0] = glm::vec2(-1.F, -1.F);
   vertices[1] = glm::vec2(1.F, -1.F);
@@ -133,12 +150,10 @@ Crosshair::Crosshair(std::shared_ptr<cs::core::SolarSystem> solarSystem,
   mVAO.EnableAttributeArray(0);
   mVAO.SpecifyAttributeArrayFloat(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), 0, &mVBO);
 
-  // Create shader
   mShader.InitVertexShaderFromString(VERT_SHADER);
   mShader.InitFragmentShaderFromString(FRAG_SHADER);
   mShader.Link();
 
-  // Get Uniform Locations
   mUniforms.modelViewMatrix  = mShader.GetUniformLocation("uMatModelView");
   mUniforms.projectionMatrix = mShader.GetUniformLocation("uMatProjection");
   mUniforms.texture          = mShader.GetUniformLocation("uTexture");
@@ -146,19 +161,16 @@ Crosshair::Crosshair(std::shared_ptr<cs::core::SolarSystem> solarSystem,
   mUniforms.size             = mShader.GetUniformLocation("uSize");
   mUniforms.alpha            = mShader.GetUniformLocation("uAlpha");
   mUniforms.color            = mShader.GetUniformLocation("uCustomColor");
-  
   mUniforms.observerDir      = mShader.GetUniformLocation("uObserverDir");
   mUniforms.planetUp         = mShader.GetUniformLocation("uPlanetUp");
   mUniforms.roll             = mShader.GetUniformLocation("uRoll");
 
-  // Load Texture
   mTexture = cs::graphics::TextureLoader::loadFromFile(crosshairSettings.mTexture.get());
   mTexture->SetWrapS(GL_REPEAT);
   mTexture->SetWrapR(GL_REPEAT);
 
-  // Add to scenegraph
-  VistaSceneGraph* pSG = GetVistaSystem()->GetGraphicsManager()->GetSceneGraph();
-  auto* platform = GetVistaSystem()
+  VistaSceneGraph* pSG      = GetVistaSystem()->GetGraphicsManager()->GetSceneGraph();
+  auto*            platform = GetVistaSystem()
                        ->GetPlatformFor(GetVistaSystem()->GetDisplayManager()->GetDisplaySystem())
                        ->GetPlatformNode();
   mOffsetNode.reset(pSG->NewTransformNode(platform));
@@ -191,59 +203,53 @@ void Crosshair::update() {
 }
 
 bool Crosshair::Do() {
-  auto const& mObserver       = mSolarSystem->getObserver();
-  auto        dir             = mObserver.getVelocityDirection();
-  auto        speed           = mObserver.getVelocityMagnitude();
+  auto const& mObserver           = mSolarSystem->getObserver();
+  auto        dir                 = mObserver.getVelocityDirection();
+  auto        speed               = mObserver.getVelocityMagnitude();
   glm::dvec3  nearestPlanetPos    = mObserver.getClosestPlanetToObserverPosition();
   glm::dvec3  nearestPlanetNormal = glm::normalize(nearestPlanetPos);
 
   // --- LOGIK: DREHGESCHWINDIGKEIT ---
-  
+
   double currentTime = GetVistaSystem()->GetFrameClock();
-  
-  // Wir prüfen, ob dies ein neuer Frame ist (Zeit ist vorangeschritten).
-  // In VR rendern wir 2x pro Frame (Links/Rechts).
-  // Wenn currentTime == mLastTime, ist dies das zweite Auge -> keine Neuberechnung!
+
   if (currentTime > mLastTime) {
-      
-      double dt = currentTime - mLastTime;
-      
-      // Initialisierung beim allerersten Frame
-      if (mLastTime == 0.0) {
-          mLastTime = currentTime;
-          mLastForward = mObserver.getRotation() * glm::dvec3(0.0, 0.0, -1.0);
-          return true;
-      }
 
-      // Berechnung durchführen
-      if (dt > 0.0001) {
-          glm::dvec3 currentForward = mObserver.getRotation() * glm::dvec3(0.0, 0.0, -1.0);
-          glm::dvec3 up = nearestPlanetNormal;
-          
-          // Projektion auf Tangentialebene
-          glm::dvec3 f1 = glm::normalize(currentForward - glm::dot(currentForward, up) * up);
-          glm::dvec3 f2 = glm::normalize(mLastForward - glm::dot(mLastForward, up) * up);
+    double dt = currentTime - mLastTime;
 
-          glm::dvec3 cross = glm::cross(f2, f1);
-          double sinAngle = glm::length(cross);
-          double sign = (glm::dot(cross, up) > 0.0) ? 1.0 : -1.0;
-          double yawAngle = std::asin(glm::clamp(sinAngle, -1.0, 1.0)) * sign;
+    if (mLastTime == 0.0) {
+      mLastTime    = currentTime;
+      mLastForward = mObserver.getRotation() * glm::dvec3(0.0, 0.0, -1.0);
+      return true;
+    }
 
-          double yawRate = yawAngle / dt;
+    if (dt > 0.0001) {
+      glm::dvec3 currentForward = mObserver.getRotation() * glm::dvec3(0.0, 0.0, -1.0);
+      glm::dvec3 up             = nearestPlanetNormal;
 
-          // Mapping auf Roll
-          const float ROLL_FACTOR = -0.3f; 
-          float calculatedRoll = static_cast<float>(yawRate * ROLL_FACTOR);
-          
-          // Speichern in der Klassenvariable (für beide Augen)
-          mCurrentRoll = glm::clamp(calculatedRoll, -1.0f, 1.0f);
-          
-          // Referenz für nächsten Frame aktualisieren
-          mLastForward = currentForward;
-      }
-      
-      // Zeitstempel aktualisieren (damit das zweite Auge weiß, dass es zu spät ist)
-      mLastTime = currentTime;
+      glm::dvec3 f1 = glm::normalize(currentForward - glm::dot(currentForward, up) * up);
+      glm::dvec3 f2 = glm::normalize(mLastForward - glm::dot(mLastForward, up) * up);
+
+      glm::dvec3 cross    = glm::cross(f2, f1);
+      double     sinAngle = glm::length(cross);
+      double     sign     = (glm::dot(cross, up) > 0.0) ? 1.0 : -1.0;
+      double     yawAngle = std::asin(glm::clamp(sinAngle, -1.0, 1.0)) * sign;
+
+      double yawRate = yawAngle / dt;
+
+      // --- VERWENDUNG DER SETTINGS ---
+
+      // Zugriff auf die Config-Werte
+      // Falls noch nichts in der Config steht, greifen die Default-Werte aus dem Struct
+      float baseFactor = mCrosshairSettings.mRollBaseFactor.get();
+      float amplifier  = mCrosshairSettings.mRollAmplifier.get();
+
+      float calculatedRoll = static_cast<float>(yawRate * baseFactor * amplifier);
+
+      mCurrentRoll = glm::clamp(calculatedRoll, -1.0f, 1.0f);
+      mLastForward = currentForward;
+    }
+    mLastTime = currentTime;
   }
   // --- ENDE LOGIK ---
 
@@ -278,9 +284,8 @@ bool Crosshair::Do() {
 
   glUniform3fv(mUniforms.observerDir, 1, glm::value_ptr(observerDirF));
   glUniform3fv(mUniforms.planetUp, 1, glm::value_ptr(planetUpF));
-  
+
   if (mUniforms.roll != -1) {
-    // Hier nutzen wir jetzt die gespeicherte Klassenvariable
     glUniform1f(mUniforms.roll, mCurrentRoll);
   }
 
@@ -295,7 +300,7 @@ bool Crosshair::Do() {
 
   glPushAttrib(GL_ENABLE_BIT | GL_BLEND | GL_DEPTH_BUFFER_BIT);
   glEnable(GL_BLEND);
-  glBlendFunc(GL_ONE, GL_ONE); 
+  glBlendFunc(GL_ONE, GL_ONE);
 
   glDisable(GL_DEPTH_TEST);
   glDepthMask(false);

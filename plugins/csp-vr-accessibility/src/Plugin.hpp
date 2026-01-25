@@ -32,9 +32,9 @@ class Plugin : public cs::core::PluginBase {
 
     struct ViewOffset {
       /// Toggle, whether the pitch correction is applied or not
-      cs::utils::Property<bool>   mEnabled = false;
+      cs::utils::Property<bool> mEnabled = false;
       /// How many rotation degrees the view pitch should get tilted
-      cs::utils::Property<double> mPitch   = 0.0;
+      cs::utils::Property<double> mPitch = 0.0;
     };
     ViewOffset mViewOffsetSettings;
 
@@ -91,6 +91,12 @@ class Plugin : public cs::core::PluginBase {
 
       /// The Vector3 Normal of the nearest Planet to the Observer.
       cs::utils::DefaultProperty<glm::vec3> mPlanetUp{glm::vec3(0.0F, 1.0F, 0.0F)};
+
+      // Crosshair roll sensitivity (negative value to curve inwards)
+      cs::utils::Property<float> mRollBaseFactor{-0.3f};
+
+      // Crosshair roll amplifier
+      cs::utils::Property<float> mRollAmplifier{1.0f};
     };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -209,7 +215,7 @@ class Plugin : public cs::core::PluginBase {
   std::shared_ptr<VirtualHorizon>   mVirtualHorizon;
   std::shared_ptr<FloorGrid>        mGrid;
   std::shared_ptr<FovVignette>      mVignette;
-  std::shared_ptr<ViewOffset>       mViewOffsetSettings;
+  std::shared_ptr<ViewOffset>       mViewOffset;
 
   bool resetColorPicker{true};
 

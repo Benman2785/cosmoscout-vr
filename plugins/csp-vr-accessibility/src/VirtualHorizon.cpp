@@ -8,9 +8,9 @@
 #include "VirtualHorizon.hpp"
 
 #include "../../../src/cs-core/SolarSystem.hpp"
-#include "../../../src/cs-scene/CelestialObserver.hpp"
-#include "../../../src/cs-scene/CelestialObject.hpp"
 #include "../../../src/cs-graphics/TextureLoader.hpp"
+#include "../../../src/cs-scene/CelestialObject.hpp"
+#include "../../../src/cs-scene/CelestialObserver.hpp"
 #include "../../../src/cs-utils/FrameStats.hpp"
 #include "logger.hpp"
 
@@ -80,9 +80,9 @@ void main() {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//Constructor
-VirtualHorizon::VirtualHorizon(
-    std::shared_ptr<cs::core::SolarSystem> solarSystem, Plugin::Settings::VirtualHorizon& virtualHorizonSettings)
+// Constructor
+VirtualHorizon::VirtualHorizon(std::shared_ptr<cs::core::SolarSystem> solarSystem,
+    Plugin::Settings::VirtualHorizon&                                 virtualHorizonSettings)
     : mSolarSystem(std::move(solarSystem))
     , mVirtualHorizonSettings(virtualHorizonSettings) {
 
@@ -135,7 +135,7 @@ VirtualHorizon::VirtualHorizon(
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//Destructor
+// Destructor
 VirtualHorizon::~VirtualHorizon() {
   // remove Nodes from GUI
   auto* platform = GetVistaSystem()
@@ -168,7 +168,7 @@ void VirtualHorizon::update() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool VirtualHorizon::Do() {
-  //TODO get Direction info into: mSolarSystem->getObserver();
+  // TODO get Direction info into: mSolarSystem->getObserver();
   auto const& mObserver = mSolarSystem->getObserver();
   auto        dir       = mObserver.getVelocityDirection();
   auto        speed     = mObserver.getVelocityMagnitude();
@@ -181,8 +181,7 @@ bool VirtualHorizon::Do() {
     logger().error("NaN detected in speed!");
   }
 
-
-  //logger().info("Observer moving towards: ({}, {}, {}), speed: {}", dir.x, dir.y, dir.z, speed);
+  // logger().info("Observer moving towards: ({}, {}, {}), speed: {}", dir.x, dir.y, dir.z, speed);
 
   // do nothing if virtualHorizon is disabled
   if (!mVirtualHorizonSettings.mEnabled.get()) {
@@ -226,7 +225,7 @@ bool VirtualHorizon::Do() {
   glPushAttrib(GL_ENABLE_BIT | GL_BLEND | GL_DEPTH_BUFFER_BIT);
   glEnable(GL_BLEND);
   glBlendFunc(GL_ONE, GL_ONE); // turns black-mask texture into alpha (technically not correct)
-  
+
   // Disable depth test -> always draw on top
   glDisable(GL_DEPTH_TEST);
   glDepthMask(false);

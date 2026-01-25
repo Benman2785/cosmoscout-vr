@@ -5,14 +5,13 @@
 #include "ViewOffset.hpp"
 #include "../../../src/cs-utils/logger.hpp"
 
-#include <VistaKernel/VistaSystem.h>
-#include <VistaKernel/GraphicsManager/VistaGraphicsManager.h>
-#include <VistaKernel/GraphicsManager/VistaSceneGraph.h>
-#include <VistaKernel/GraphicsManager/VistaGroupNode.h> // Wichtig für Suche
 #include <VistaBase/VistaQuaternion.h>
 #include <VistaBase/VistaVector3D.h>
+#include <VistaKernel/GraphicsManager/VistaGraphicsManager.h>
+#include <VistaKernel/GraphicsManager/VistaSceneGraph.h>
+#include <VistaKernel/GraphicsManager/VistaTransformNode.h>
+#include <VistaKernel/VistaSystem.h>
 #include <glm/glm.hpp>
-#include <iostream> // Für std::cout falls logger versagt
 
 namespace csp::vraccessibility {
 
@@ -20,67 +19,58 @@ ViewOffset::ViewOffset(Plugin::Settings::ViewOffset const& settings)
     : mSettings(settings) {
 
   auto* sg = GetVistaSystem()->GetGraphicsManager()->GetSceneGraph();
-  
-  // DEBUG: Wir suchen den Node und geben Bescheid
-  logger().info("ViewOffset: Searching for 'VirtualPlatform'...");
 
-  mPlatformNode = dynamic_cast<VistaTransformNode*>(sg->GetNode("VirtualPlatform"));
+  // Wir greifen uns direkt den Vater aller Knoten.
+  // Hierauf wendet CosmoScout die Planeten-Rotation an.
+  mPlatformNode = dynamic_cast<VistaTransformNode*>(sg->GetNode("Virtualplatform-Node"));
 
   if (!mPlatformNode) {
-      logger().warn("ViewOffset: 'VirtualPlatform' not found directly. Trying 'VirtualPlatform-Node'...");
-      mPlatformNode = dynamic_cast<VistaTransformNode*>(sg->GetNode("VirtualPlatform-Node"));
+    mPlatformNode = dynamic_cast<VistaTransformNode*>(sg->GetNode("VirtualPlatform-Node"));
   }
 
-  // FALLBACK SUCHE: Falls wir den Namen nicht kennen, drucken wir alle Root-Kinder aus
   if (!mPlatformNode) {
-      logger().error("ViewOffset: CRITICAL - VirtualPlatform Node NOT found!");
-      
-      VistaGroupNode* root = sg->GetRoot();
-      logger().info("ViewOffset: Dumping SceneGraph Root Children to help you find the name:");
-      for (unsigned int i = 0; i < root->GetNumChildren(); ++i) {
-          IVistaNode* child = root->GetChild(i);
-          logger().info("   Child {}: '{}' (Type: {})", i, child->GetName(), (int)child->GetType());
-      }
+    logger().error("ViewOffset: CRITICAL - 'Virtualplatform-Node' not found!");
   } else {
-      logger().info("ViewOffset: SUCCESS - Found Node '{}'", mPlatformNode->GetName());
-      configure(mSettings);
+    logger().info(
+        "ViewOffset: Hooked into 'Virtualplatform-Node' for frame-based rotation correction.");
+    configure(mSettings);
   }
 }
 
 void ViewOffset::configure(Plugin::Settings::ViewOffset const& settings) {
   mSettings = settings;
-
-  if (mPlatformNode) {
-      // DEBUG LOGGING
-      logger().info("ViewOffset: Applying Settings. Enabled: {}, Pitch: {}", 
-          mSettings.mEnabled.get(), mSettings.mPitch.get());
-
-    if (mSettings.mEnabled.get()) {
-      float pitchRad = glm::radians(static_cast<float>(mSettings.mPitch.get()));
-      VistaAxisAndAngle axisAngle(VistaVector3D(1, 0, 0), pitchRad);
-      VistaQuaternion   orientation(axisAngle);
-
-      mPlatformNode->SetRotation(orientation);
-      logger().info("ViewOffset: Rotation set to {} degrees.", mSettings.mPitch.get());
-    } else {
-      mPlatformNode->SetRotation(VistaQuaternion(0, 0, 0, 1));
-      logger().info("ViewOffset: Rotation reset to 0.");
-    }
-  }
+  // In dieser Variante passiert die Magie hauptsächlich im update() Loop,
+  // da wir jeden Frame neu eingreifen müssen.
 }
 
 void ViewOffset::update() {
-    // FORCE UPDATE: Falls das Tracking die Rotation überschreibt, 
-    // setzen wir sie hier jeden Frame neu.
-    if (mPlatformNode && mSettings.mEnabled.get()) {
-        float pitchRad = glm::radians(static_cast<float>(mSettings.mPitch.get()));
-        VistaAxisAndAngle axisAngle(VistaVector3D(1, 0, 0), pitchRad);
-        VistaQuaternion   orientation(axisAngle);
-        
-        // Wir holen die aktuelle Rotation und vergleichen (Optional, spart Performance)
-        // Aber für den Test "hämmern" wir den Wert rein.
-        mPlatformNode->SetRotation(orientation);
-    }
+  if (mPlatformNode && mSettings.mEnabled.get()) {
+
+    // 1. Wir holen uns die Rotation, die CosmoScout/SolarSystem für diesen Frame berechnet hat.
+    // Diese Rotation sorgt dafür, dass wir gerade auf dem Planeten stehen.
+    VistaQuaternion currentRotation;
+    mPlatformNode->GetRotation(currentRotation);
+
+    // 2. Wir bauen unsere lokale Offset-Rotation (Nicken nach unten/oben).
+    // Wir nutzen GLM für die Umrechnung.
+    float pitchRad = glm::radians(static_cast<float>(mSettings.mPitch.get()));
+
+    // Rotation um die lokale X-Achse (1, 0, 0).
+    VistaAxisAndAngle axisAngle(VistaVector3D(1, 0, 0), pitchRad);
+    VistaQuaternion   offsetRotation(axisAngle);
+
+    // 3. Wir kombinieren die Rotationen.
+    // WICHTIG: Die Reihenfolge der Multiplikation bestimmt, ob wir
+    // um die Welt-Achsen oder die lokalen Achsen drehen.
+    // currentRotation * offsetRotation = Drehung um die LOKALE Achse der Plattform.
+    // Das ist genau das, was wir wollen (den "Kopf" neigen, egal wo auf dem Planeten wir sind).
+    VistaQuaternion finalRotation = currentRotation * offsetRotation;
+
+    // 4. Wir schreiben das Ergebnis zurück.
+    // Da CosmoScout im nächsten Frame wieder die "currentRotation" (ohne Offset)
+    // aus der Physik-Engine lädt, addiert sich hier nichts auf. Es gibt kein Spinning.
+    mPlatformNode->SetRotation(finalRotation);
+  }
 }
 
 } // namespace csp::vraccessibility

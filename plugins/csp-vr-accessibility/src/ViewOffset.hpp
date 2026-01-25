@@ -15,7 +15,7 @@
 
 namespace csp::vraccessibility {
 
-/// This class allows rotating the VirtualPlatform to compensate for the physical 
+/// This class allows rotating the VirtualPlatform to compensate for the physical
 /// inclination of devices like the Icaros Pro.
 class ViewOffset {
  public:
@@ -24,13 +24,14 @@ class ViewOffset {
   /// Updates the rotation of the VirtualPlatform based on the settings.
   void configure(Plugin::Settings::ViewOffset const& settings);
 
-  /// Call this every frame? Actually not needed for static offset, 
+  /// Call this every frame? Actually not needed for static offset,
   /// but good to have if we ever want to animate it.
   void update();
 
  private:
   Plugin::Settings::ViewOffset mSettings;
-  VistaTransformNode* mPlatformNode = nullptr;
+  VistaTransformNode*          mPlatformNode = nullptr;
+  VistaTransformNode*          mOffsetNode   = nullptr;
 };
 
 } // namespace csp::vraccessibility

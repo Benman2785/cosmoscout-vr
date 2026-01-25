@@ -15,12 +15,12 @@
 #include "../../../src/cs-core/SolarSystem.hpp"
 #include "../../../src/cs-utils/logger.hpp"
 #include "../../../src/cs-utils/utils.hpp"
-#include "Crosshair.hpp" 
-#include "VirtualHorizon.hpp" 
+#include "Crosshair.hpp"
 #include "FloorGrid.hpp"
 #include "FovVignette.hpp"
 #include "MotionPointField.hpp"
 #include "ViewOffset.hpp"
+#include "VirtualHorizon.hpp"
 #include "logger.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -59,7 +59,6 @@ void to_json(nlohmann::json& j, Plugin::Settings::MotionPoints const& o) {
   cs::core::Settings::serialize(j, "alpha", o.mAlpha);
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // TO & FROM JSON OF CROSSHAIR
 void from_json(nlohmann::json const& j, Plugin::Settings::Crosshair& o) {
@@ -72,6 +71,8 @@ void from_json(nlohmann::json const& j, Plugin::Settings::Crosshair& o) {
   cs::core::Settings::deserialize(j, "color", o.mColor);
   cs::core::Settings::deserialize(j, "observerDir", o.mObserverDir);
   cs::core::Settings::deserialize(j, "planetUp", o.mPlanetUp);
+  cs::core::Settings::deserialize(j, "rollBaseFactor", o.mRollBaseFactor);
+  cs::core::Settings::deserialize(j, "rollAmplifier", o.mRollAmplifier);
 }
 
 void to_json(nlohmann::json& j, Plugin::Settings::Crosshair const& o) {
@@ -84,10 +85,12 @@ void to_json(nlohmann::json& j, Plugin::Settings::Crosshair const& o) {
   cs::core::Settings::serialize(j, "color", o.mColor);
   cs::core::Settings::serialize(j, "observerDir", o.mObserverDir);
   cs::core::Settings::serialize(j, "planetUp", o.mPlanetUp);
+  cs::core::Settings::serialize(j, "rollBaseFactor", o.mRollBaseFactor);
+  cs::core::Settings::serialize(j, "rollAmplifier", o.mRollAmplifier);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// TO & FROM JSON OF VIRTUAL HORIZON 
+// TO & FROM JSON OF VIRTUAL HORIZON
 void from_json(nlohmann::json const& j, Plugin::Settings::VirtualHorizon& o) {
   cs::core::Settings::deserialize(j, "enabled", o.mEnabled);
   cs::core::Settings::deserialize(j, "size", o.mSize);
@@ -109,7 +112,7 @@ void to_json(nlohmann::json& j, Plugin::Settings::VirtualHorizon const& o) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// TO & FROM JSON OF FLOOR GRID 
+// TO & FROM JSON OF FLOOR GRID
 void from_json(nlohmann::json const& j, Plugin::Settings::Grid& o) {
   cs::core::Settings::deserialize(j, "enabled", o.mEnabled);
   cs::core::Settings::deserialize(j, "size", o.mSize);
@@ -131,7 +134,7 @@ void to_json(nlohmann::json& j, Plugin::Settings::Grid const& o) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// TO & FROM JSON OF VIGNETTE 
+// TO & FROM JSON OF VIGNETTE
 void from_json(nlohmann::json const& j, Plugin::Settings::Vignette& o) {
   cs::core::Settings::deserialize(j, "enabled", o.mEnabled);
   cs::core::Settings::deserialize(j, "debug", o.mDebug);
@@ -157,7 +160,7 @@ void to_json(nlohmann::json& j, Plugin::Settings::Vignette const& o) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// TO & FROM JSON OF VIEW OFFSET (NEU)
+// TO & FROM JSON OF VIEW OFFSET
 void from_json(nlohmann::json const& j, Plugin::Settings::ViewOffset& o) {
   cs::core::Settings::deserialize(j, "enabled", o.mEnabled);
   cs::core::Settings::deserialize(j, "pitch", o.mPitch);
@@ -240,9 +243,8 @@ void Plugin::init() {
     mGuiManager->getGui()->callJavascript("CosmoScout.motionPoints.setColorValue", value);
   });
 
-
   ////////////////////////////////////////////////////////////////////////////////////////////////////
-  // SETTINGS FOR VIRTUAL HORIZON
+  // SETTINGS FOR CROSSHAIR
 
   // register callback for crosshair enable crosshair checkbox
   mGuiManager->getGui()->registerCallback("crosshair.setEnabled",
@@ -285,13 +287,33 @@ void Plugin::init() {
     mGuiManager->getGui()->callJavascript("CosmoScout.crosshair.setColorValue", value);
   });
 
+  // <--- NEU: Register callback for crosshair roll base factor (Sensitivity)
+  mGuiManager->getGui()->registerCallback("crosshair.setRollBaseFactor",
+      "Sets the base sensitivity for crosshair roll.", std::function([this](double value) {
+        mPluginSettings->mCrosshairSettings.mRollBaseFactor = static_cast<float>(value);
+        // Wir müssen configure aufrufen, damit der Wert sofort übernommen wird, falls nötig
+        mCrosshair->configure(mPluginSettings->mCrosshairSettings);
+      }));
+  mPluginSettings->mCrosshairSettings.mRollBaseFactor.connectAndTouch(
+      [this](float value) { mGuiManager->setSliderValue("crosshair.setRollBaseFactor", value); });
+
+  // <--- NEU: Register callback for crosshair roll amplifier
+  mGuiManager->getGui()->registerCallback("crosshair.setRollAmplifier",
+      "Sets the amplifier for crosshair roll.", std::function([this](double value) {
+        mPluginSettings->mCrosshairSettings.mRollAmplifier = static_cast<float>(value);
+        mCrosshair->configure(mPluginSettings->mCrosshairSettings);
+      }));
+  mPluginSettings->mCrosshairSettings.mRollAmplifier.connectAndTouch(
+      [this](float value) { mGuiManager->setSliderValue("crosshair.setRollAmplifier", value); });
+
   ////////////////////////////////////////////////////////////////////////////////////////////////////
-  // SETTINGS FOR CROSSHAIR
+  // SETTINGS FOR VIRTUAL HORIZON
 
   // register callback for virtualHorizon enable virtualHorizon checkbox
   mGuiManager->getGui()->registerCallback("virtualHorizon.setEnabled",
-      "Enables or disables rendering the virtualHorizon.",
-      std::function([this](bool enable) { mPluginSettings->mVirtualHorizonSettings.mEnabled = enable; }));
+      "Enables or disables rendering the virtualHorizon.", std::function([this](bool enable) {
+        mPluginSettings->mVirtualHorizonSettings.mEnabled = enable;
+      }));
   mPluginSettings->mVirtualHorizonSettings.mEnabled.connectAndTouch(
       [this](bool enable) { mGuiManager->setCheckboxValue("virtualHorizon.setEnabled", enable); });
 
@@ -304,16 +326,16 @@ void Plugin::init() {
       [this](float value) { mGuiManager->setSliderValue("virtualHorizon.setSize", value); });
 
   // register callback for virtualHorizon extent slider
-  mGuiManager->getGui()->registerCallback(
-      "virtualHorizon.setExtent", "Value to scale the entire virtualHorizon.", std::function([this](double value) {
+  mGuiManager->getGui()->registerCallback("virtualHorizon.setExtent",
+      "Value to scale the entire virtualHorizon.", std::function([this](double value) {
         mPluginSettings->mVirtualHorizonSettings.mExtent = static_cast<float>(value);
       }));
   mPluginSettings->mVirtualHorizonSettings.mExtent.connectAndTouch(
       [this](float value) { mGuiManager->setSliderValue("virtualHorizon.setExtent", value); });
 
   // register callback for virtualHorizon alpha slider
-  mGuiManager->getGui()->registerCallback(
-      "virtualHorizon.setAlpha", "Value to adjust virtualHorizon opacity.", std::function([this](double value) {
+  mGuiManager->getGui()->registerCallback("virtualHorizon.setAlpha",
+      "Value to adjust virtualHorizon opacity.", std::function([this](double value) {
         mPluginSettings->mVirtualHorizonSettings.mAlpha = static_cast<float>(value);
       }));
   mPluginSettings->mVirtualHorizonSettings.mAlpha.connectAndTouch(
@@ -457,25 +479,22 @@ void Plugin::init() {
   // SETTINGS FOR VIEW OFFSET (NEU)
 
   mGuiManager->getGui()->registerCallback("viewOffset.setEnabled",
-      "Enables or disables the view pitch offset.",
-      std::function([this](bool enable) {
+      "Enables or disables the view pitch offset.", std::function([this](bool enable) {
         mPluginSettings->mViewOffsetSettings.mEnabled = enable;
         // Sofort anwenden
-        mViewOffsetSettings->configure(mPluginSettings->mViewOffsetSettings);
+        mViewOffset->configure(mPluginSettings->mViewOffsetSettings);
       }));
   mPluginSettings->mViewOffsetSettings.mEnabled.connectAndTouch(
       [this](bool enable) { mGuiManager->setCheckboxValue("viewOffset.setEnabled", enable); });
 
   mGuiManager->getGui()->registerCallback("viewOffset.setPitch",
-      "Sets the pitch offset in degrees.",
-      std::function([this](double value) {
+      "Sets the pitch offset in degrees.", std::function([this](double value) {
         mPluginSettings->mViewOffsetSettings.mPitch = value;
         // Sofort anwenden
-        mViewOffsetSettings->configure(mPluginSettings->mViewOffsetSettings);
+        mViewOffset->configure(mPluginSettings->mViewOffsetSettings);
       }));
   mPluginSettings->mViewOffsetSettings.mPitch.connectAndTouch(
       [this](double value) { mGuiManager->setSliderValue("viewOffset.setPitch", value); });
-
 
   // Load settings.
   onLoad();
@@ -500,34 +519,38 @@ void Plugin::deInit() {
   mGuiManager->getGui()->callJavascript("CosmoScout.removeApi", "floorGrid");
   mGuiManager->getGui()->callJavascript("CosmoScout.removeApi", "fovVignette");
   // viewOffset API entfernen (falls in JS angelegt)
-  // mGuiManager->getGui()->callJavascript("CosmoScout.removeApi", "viewOffset"); 
+  // mGuiManager->getGui()->callJavascript("CosmoScout.removeApi", "viewOffset");
 
   // remove callbacks
-  //motionPoints
+  // motionPoints
   mGuiManager->getGui()->unregisterCallback("motionPoints.setEnabled");
   mGuiManager->getGui()->unregisterCallback("motionPoints.setCount");
   mGuiManager->getGui()->unregisterCallback("motionPoints.setRadius");
   mGuiManager->getGui()->unregisterCallback("motionPoints.setSize");
   mGuiManager->getGui()->unregisterCallback("motionPoints.setColor");
-  //crosshair
+  // crosshair
   mGuiManager->getGui()->unregisterCallback("crosshair.setEnabled");
   mGuiManager->getGui()->unregisterCallback("crosshair.setSize");
   mGuiManager->getGui()->unregisterCallback("crosshair.setExtent");
   mGuiManager->getGui()->unregisterCallback("crosshair.setAlpha");
   mGuiManager->getGui()->unregisterCallback("crosshair.setColor");
-  //virtualHorizon
+  // <--- NEU: Unregister roll parameters
+  mGuiManager->getGui()->unregisterCallback("crosshair.setRollBaseFactor");
+  mGuiManager->getGui()->unregisterCallback("crosshair.setRollAmplifier");
+
+  // virtualHorizon
   mGuiManager->getGui()->unregisterCallback("virtualHorizon.setEnabled");
   mGuiManager->getGui()->unregisterCallback("virtualHorizon.setSize");
   mGuiManager->getGui()->unregisterCallback("virtualHorizon.setExtent");
   mGuiManager->getGui()->unregisterCallback("virtualHorizon.setAlpha");
   mGuiManager->getGui()->unregisterCallback("virtualHorizon.setColor");
-  //floorGrid
+  // floorGrid
   mGuiManager->getGui()->unregisterCallback("floorGrid.setEnabled");
   mGuiManager->getGui()->unregisterCallback("floorGrid.setSize");
   mGuiManager->getGui()->unregisterCallback("floorGrid.setExtent");
   mGuiManager->getGui()->unregisterCallback("floorGrid.setAlpha");
   mGuiManager->getGui()->unregisterCallback("floorGrid.setColor");
-  //vignette
+  // vignette
   mGuiManager->getGui()->unregisterCallback("fovVignette.setEnabled");
   mGuiManager->getGui()->unregisterCallback("fovVignette.setDebug");
   mGuiManager->getGui()->unregisterCallback("fovVignette.setEnableDynamicRadius");
@@ -537,7 +560,7 @@ void Plugin::deInit() {
   mGuiManager->getGui()->unregisterCallback("fovVignette.setVelocityThresholds");
   mGuiManager->getGui()->unregisterCallback("fovVignette.setDuration");
   mGuiManager->getGui()->unregisterCallback("fovVignette.setDeadzone");
-  //viewOffset
+  // viewOffset
   mGuiManager->getGui()->unregisterCallback("viewOffset.setEnabled");
   mGuiManager->getGui()->unregisterCallback("viewOffset.setPitch");
 
@@ -555,11 +578,11 @@ void Plugin::update() {
     // reread settings from json
     from_json(mAllSettings->mPlugins.at("csp-vr-accessibility"), *mPluginSettings);
     // reset crosshair color into picker
-    mGuiManager->getGui()->callJavascript("CosmoScout.crosshair.setColorValue",
-        mPluginSettings->mCrosshairSettings.mColor.get());
-    // reset virtualHorizon color into picker
     mGuiManager->getGui()->callJavascript(
-        "CosmoScout.virtualHorizon.setColorValue", mPluginSettings->mVirtualHorizonSettings.mColor.get());
+        "CosmoScout.crosshair.setColorValue", mPluginSettings->mCrosshairSettings.mColor.get());
+    // reset virtualHorizon color into picker
+    mGuiManager->getGui()->callJavascript("CosmoScout.virtualHorizon.setColorValue",
+        mPluginSettings->mVirtualHorizonSettings.mColor.get());
     // reset grid color into picker
     mGuiManager->getGui()->callJavascript(
         "CosmoScout.floorGrid.setColorValue", mPluginSettings->mGridSettings.mColor.get());
@@ -570,10 +593,13 @@ void Plugin::update() {
     resetColorPicker = false;
   }
 
+  if (mViewOffset) {
+    mViewOffset->update();
+  }
   // trigger update method in other parts of the plugin, if they are enabled
-  //TODO remove? if (mPluginSettings->mMotionPointsSettings.mEnabled.get()) {
-  //TODO remove?   mMotionPoints->update();
-  //TODO remove? }
+  // TODO remove? if (mPluginSettings->mMotionPointsSettings.mEnabled.get()) {
+  // TODO remove?   mMotionPoints->update();
+  // TODO remove? }
   if (mPluginSettings->mCrosshairSettings.mEnabled.get()) {
     mCrosshair->update();
   }
@@ -591,9 +617,6 @@ void Plugin::update() {
       mVignette->updateFadeAnimatedVignette();
     }
   }
-
-  // ViewOffset benötigt kein Update pro Frame, da es statisch ist.
-  // mViewOffsetSettings->update(); 
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -606,15 +629,14 @@ void Plugin::onLoad() {
   mMotionPoints =
       std::make_shared<MotionPointField>(mSolarSystem, mPluginSettings->mMotionPointsSettings);
 
-
-    // Create & configure Crosshair
-  mCrosshair =
-      std::make_shared<Crosshair>(mSolarSystem, mPluginSettings->mCrosshairSettings);
-  mCrosshair->configure(mPluginSettings->mCrosshairSettings); 
+  // Create & configure Crosshair
+  mCrosshair = std::make_shared<Crosshair>(mSolarSystem, mPluginSettings->mCrosshairSettings);
+  mCrosshair->configure(mPluginSettings->mCrosshairSettings);
 
   // Create & configure VirtualHorizon
-  mVirtualHorizon = std::make_shared<VirtualHorizon>(mSolarSystem, mPluginSettings->mVirtualHorizonSettings);
-  mVirtualHorizon->configure(mPluginSettings->mVirtualHorizonSettings); 
+  mVirtualHorizon =
+      std::make_shared<VirtualHorizon>(mSolarSystem, mPluginSettings->mVirtualHorizonSettings);
+  mVirtualHorizon->configure(mPluginSettings->mVirtualHorizonSettings);
 
   // Create & configure FloorGrid
   mGrid = std::make_shared<FloorGrid>(mSolarSystem, mPluginSettings->mGridSettings);
@@ -625,8 +647,8 @@ void Plugin::onLoad() {
   mVignette->configure(mPluginSettings->mVignetteSettings);
 
   // Create & configure ViewOffset
-  mViewOffsetSettings = std::make_shared<ViewOffset>(mPluginSettings->mViewOffsetSettings);
-  mViewOffsetSettings->configure(mPluginSettings->mViewOffsetSettings);
+  mViewOffset = std::make_shared<ViewOffset>(mPluginSettings->mViewOffsetSettings);
+  mViewOffset->configure(mPluginSettings->mViewOffsetSettings);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

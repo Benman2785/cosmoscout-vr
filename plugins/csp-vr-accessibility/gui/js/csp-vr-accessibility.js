@@ -139,9 +139,9 @@
     }
 
     /**
-    * ////////////////////////////////////////////////////////////////////////////////////////////////////
-    * Crosshair Api
-    */
+ * ////////////////////////////////////////////////////////////////////////////////////////////////////
+ * Crosshair Api
+ */
     class CrosshairApi extends IApi {
         /**
          * @inheritDoc
@@ -156,6 +156,9 @@
             CosmoScout.gui.initSlider("crosshair.setSize", 0.1, 2, 0.1, [0.5]);
             CosmoScout.gui.initSlider("crosshair.setExtent", 1, 20, 0.1, [10]);
             CosmoScout.gui.initSlider("crosshair.setAlpha", 0, 1, 0.01, [1]);
+            CosmoScout.gui.initSlider("crosshair.setRollBaseFactor", -1.0, 0.0, 0.05, [-0.3]);
+            CosmoScout.gui.initSlider("crosshair.setRollAmplifier", 0.0, 3.0, 0.1, [1.0]);
+
             this.picker = document.querySelector('#crosshair-setColor');
 
             this.picker.picker = new CP(this.picker);
@@ -183,99 +186,99 @@
         }
     }
 
-  /**
-   * ////////////////////////////////////////////////////////////////////////////////////////////////////
-   * Floor Grid Api
-   */
-  class FloorGridApi extends IApi {
     /**
-     * @inheritDoc
+     * ////////////////////////////////////////////////////////////////////////////////////////////////////
+     * Floor Grid Api
      */
-    name = 'floorGrid';
-    picker;
+    class FloorGridApi extends IApi {
+        /**
+         * @inheritDoc
+         */
+        name = 'floorGrid';
+        picker;
 
-    /**
-     * @inheritDoc
-     */
-    init() {
-      CosmoScout.gui.initSlider("floorGrid.setSize", 0.1, 2, 0.1, [0.5]);
-      CosmoScout.gui.initSlider("floorGrid.setExtent", 1, 20, 0.1, [10]);
-      CosmoScout.gui.initSlider("floorGrid.setAlpha", 0, 1, 0.01, [1]);
-      this.picker = document.querySelector('#floorGrid-setColor');
+        /**
+         * @inheritDoc
+         */
+        init() {
+            CosmoScout.gui.initSlider("floorGrid.setSize", 0.1, 2, 0.1, [0.5]);
+            CosmoScout.gui.initSlider("floorGrid.setExtent", 1, 20, 0.1, [10]);
+            CosmoScout.gui.initSlider("floorGrid.setAlpha", 0, 1, 0.01, [1]);
+            this.picker = document.querySelector('#floorGrid-setColor');
 
-      this.picker.picker = new CP(this.picker);
-      this.picker.picker.self.classList.add('no-alpha');
-      this.picker.picker.on('drag', (r, g, b, a) => {
-        const color                  = CP.HEX([r, g, b, 1]);
-        this.picker.style.background = color;
-        this.picker.value            = color;
+            this.picker.picker = new CP(this.picker);
+            this.picker.picker.self.classList.add('no-alpha');
+            this.picker.picker.on('drag', (r, g, b, a) => {
+                const color = CP.HEX([r, g, b, 1]);
+                this.picker.style.background = color;
+                this.picker.value = color;
 
-        CosmoScout.callbacks.floorGrid.setColor(color);
-      });
-      this.picker.oninput = (e) => {
-        const color = CP.HEX(e.target.value);
-        this.picker.picker.set(color[0], color[1], color[2], 1);
-        this.picker.style.background = CP.HEX([color[0], color[1], color[2], 1]);
+                CosmoScout.callbacks.floorGrid.setColor(color);
+            });
+            this.picker.oninput = (e) => {
+                const color = CP.HEX(e.target.value);
+                this.picker.picker.set(color[0], color[1], color[2], 1);
+                this.picker.style.background = CP.HEX([color[0], color[1], color[2], 1]);
 
-        CosmoScout.callbacks.floorGrid.setColor(e.target.value);
-      };
+                CosmoScout.callbacks.floorGrid.setColor(e.target.value);
+            };
+        }
+
+        setColorValue(color) {
+            this.picker.picker.set(CP.HEX(color));
+            this.picker.style.background = color;
+            this.picker.value = color;
+        }
     }
 
-    setColorValue(color) {
-      this.picker.picker.set(CP.HEX(color));
-      this.picker.style.background = color;
-      this.picker.value            = color;
-    }
-  }
-
-  /**
-   * ////////////////////////////////////////////////////////////////////////////////////////////////////
-   * FoV Vignette Api
-   */
-  class FovVignetteApi extends IApi {
     /**
-     * @inheritDoc
+     * ////////////////////////////////////////////////////////////////////////////////////////////////////
+     * FoV Vignette Api
      */
-    name = 'fovVignette';
-    picker;
+    class FovVignetteApi extends IApi {
+        /**
+         * @inheritDoc
+         */
+        name = 'fovVignette';
+        picker;
 
+        /**
+         * @inheritDoc
+         */
+        init() {
+            CosmoScout.gui.initSlider("fovVignette.setRadii", 0, 1.5, 0.01, [0.5, 1.0]);
+            CosmoScout.gui.initSlider("fovVignette.setVelocityThresholds", 0, 15, 0.1, [0.2, 10.0]);
+            CosmoScout.gui.initSlider("fovVignette.setDuration", 0.1, 2, 0.01, [1.0]);
+            CosmoScout.gui.initSlider("fovVignette.setDeadzone", 0, 1, 0.01, [0.5]);
+            this.picker = document.querySelector('#fovVignette-setColor');
+
+            this.picker.picker = new CP(this.picker);
+            this.picker.picker.self.classList.add('no-alpha');
+            this.picker.picker.on('change', (r, g, b, a) => {
+                const color = CP.HEX([r, g, b, 1]);
+                this.picker.style.background = color;
+                this.picker.value = color;
+                CosmoScout.callbacks.fovVignette.setColor(color);
+            });
+
+            this.picker.oninput = (e) => {
+                const color = CP.HEX(e.target.value);
+                this.picker.picker.set(color[0], color[1], color[2], 1);
+                this.picker.style.background = CP.HEX([color[0], color[1], color[2], 1]);
+                CosmoScout.callbacks.fovVignette.setColor(color);
+            }
+        }
+
+        setColorValue(color) {
+            this.picker.picker.set(CP.HEX(color));
+            this.picker.style.background = color;
+            this.picker.value = color;
+        }
+    }
     /**
-     * @inheritDoc
+     * ////////////////////////////////////////////////////////////////////////////////////////////////////
+     * INITIALIZATION
      */
-    init() {
-      CosmoScout.gui.initSlider("fovVignette.setRadii", 0, 1.5, 0.01, [0.5, 1.0]);
-      CosmoScout.gui.initSlider("fovVignette.setVelocityThresholds", 0, 15, 0.1, [0.2, 10.0]);
-      CosmoScout.gui.initSlider("fovVignette.setDuration", 0.1, 2, 0.01, [1.0]);
-      CosmoScout.gui.initSlider("fovVignette.setDeadzone", 0, 1, 0.01, [0.5]);
-      this.picker = document.querySelector('#fovVignette-setColor');
-
-      this.picker.picker = new CP(this.picker);
-      this.picker.picker.self.classList.add('no-alpha');
-      this.picker.picker.on('change', (r, g, b, a) => {
-        const color                  = CP.HEX([r, g, b, 1]);
-        this.picker.style.background = color;
-        this.picker.value            = color;
-        CosmoScout.callbacks.fovVignette.setColor(color);
-      });
-
-      this.picker.oninput = (e) => {
-        const color = CP.HEX(e.target.value);
-        this.picker.picker.set(color[0], color[1], color[2], 1);
-        this.picker.style.background = CP.HEX([color[0], color[1], color[2], 1]);
-        CosmoScout.callbacks.fovVignette.setColor(color);
-      }
-    }
-
-    setColorValue(color) {
-      this.picker.picker.set(CP.HEX(color));
-      this.picker.style.background = color;
-      this.picker.value            = color;
-    }
-  }
-  /**
-   * ////////////////////////////////////////////////////////////////////////////////////////////////////
-   * INITIALIZATION
-   */
     CosmoScout.init(
         VirtualHorizonApi,
         CrosshairApi,
