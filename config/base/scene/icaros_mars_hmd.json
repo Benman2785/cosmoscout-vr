@@ -45,6 +45,27 @@
   },
   "bookmarks": [
     {
+      "name": "Startposition Mars",
+      "time": {
+        "start": "2025-12-19T06:39:22.640Z"
+      },
+      "location": {
+        "center": "Mars",
+        "frame": "IAU_Mars",
+        "position": [
+          -3392355.1690661423,
+          -1032343.223424367,
+          -725348.5520523991
+        ],
+        "rotation": [
+          0.46129947900648227,
+          -0.4386403988928737,
+          0.6556030434627033,
+          0.40617981305068507
+        ]
+      }
+    },
+    {
       "name": "Mercury",
       "icon": "mercury.png",
       "location": {

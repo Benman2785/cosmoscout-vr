@@ -45,6 +45,27 @@
   },
   "bookmarks": [
     {
+      "name": "Startposition Erde",
+      "time": {
+        "start": "2025-12-19T13:22:39.640Z"
+      },
+      "location": {
+        "center": "Earth",
+        "frame": "IAU_Earth",
+        "position": [
+          -4954207.615032533,
+          -2920313.624036594,
+          2993144.4546265174
+        ],
+        "rotation": [
+          0.3157889671087521,
+          0.2533331341795625,
+          0.7879544057773209,
+          0.46392618571843575
+        ]
+      }
+    },
+    {
       "name": "Mercury",
       "icon": "mercury.png",
       "location": {
