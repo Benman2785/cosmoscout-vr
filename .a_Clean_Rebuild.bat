@@ -107,10 +107,10 @@ if /I "%MODE%"=="2d" (
     start "CosmoScout 2D" cmd /c "cd /d "%BIN_PATH%" && start.bat"
 ) else if /I "%MODE%"=="vr" (
     echo Starting VR mode
-    start "CosmoScout VR" cmd /c "cd /d "%BIN_PATH%" && hmd.bat"
+    start "CosmoScout VR" cmd /c "cd /d "%BIN_PATH%" && hmd_icaros_mars.bat"
 ) else (
     echo Unknown input, starting standard (VR)
-    start "CosmoScout VR" cmd /c "cd /d "%BIN_PATH%" && hmd.bat"
+    start "CosmoScout VR" cmd /c "cd /d "%BIN_PATH%" && hmd_icaros_mars.bat"
 )
 
 echo.

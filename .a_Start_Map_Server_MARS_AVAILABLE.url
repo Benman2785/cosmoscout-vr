@@ -1,0 +1,6 @@
+[InternetShortcut]
+URL=http://localhost:8080/cgi-bin/mapserv?map=/mapserver-datasets/meta.map&service=wms&version=1.3.0&request=GetMap&layers=mars.viking.rgb&bbox=-90,-180,90,180&width=1600&height=800&crs=epsg:4326&format=pngRGB
+IDList=
+HotKey=0
+IconFile=C:\Users\kjeld\AppData\Local\Mozilla\Firefox\Profiles\eehhkpf8.default-release\shortcutCache\4zcx_9E9fNOqnJNMwE+4Z5KEqZTn30cfB+Cjx72fVgA=.ico
+IconIndex=0

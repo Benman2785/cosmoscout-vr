@@ -294,7 +294,7 @@
   ],
   "spiceKernel": "../share/config/spice/simple.txt",
   "graphics": {
-    "heightScale": 20,
+    "heightScale": 15,
     "viewPitchOffset": 30,
     "eclipseShadowMaps": {
       "Earth": {},
@@ -1063,7 +1063,7 @@
       ]
     },
     "csp-trajectories": {
-      "enabled": false,
+      "enableTrajectories": false,
       "trajectories": {
         "Sun": {
           "color": [
@@ -1661,8 +1661,8 @@
     "csp-vr-accessibility": {
       "viewOffset": {
         "enabled": true,
-        "pitch": 30.0
-    },
+        "pitch": 0.0
+      },
       "motionPoints": {
         "enabled": false,
         "count": 250,
@@ -1686,7 +1686,9 @@
         "extent": 10.0,
         "texture": "../share/resources/textures/CrosshairLarge.png",
         "alpha": 1.0,
-        "color": "#ffffff"
+        "color": "#ffffff",
+        "rollBaseFactor": -0.3,
+        "rollAmplifier": 1.3
       },
       "grid": {
         "enabled": false,

@@ -16,27 +16,17 @@ if exist "%BIN_PATH%" (
 )
 
 REM =====================================================
-REM 2. Benutzer-Eingabe: VR oder 2D
+REM 2. Benutzer-Eingabe (Jede Taste startet VR)
 REM =====================================================
 echo.
-echo Start CosmoScout in
-echo vr - Head-Mounted Display (Standard)
-echo 2d - Windowed-Mode
+echo Starting CosmoScout for Icaros Pro on the Mars surface
 echo.
 
-set /p MODE=Choose [vr] or [2d]: 
-if "%MODE%"=="" set MODE=vr
+REM Hier wird auf Input gewartet, aber der Inhalt der Variable wird ignoriert
+set /p DUMMY_VAR=[Start]
 
-if /I "%MODE%"=="2d" (
-    echo Starting 2D mode
-    start "CosmoScout 2D" cmd /c "cd /d "%BIN_PATH%" && start.bat"
-) else if /I "%MODE%"=="vr" (
-    echo Starting VR mode
-    start "CosmoScout VR" cmd /c "cd /d "%BIN_PATH%" && hmd.bat"
-) else (
-    echo Unknown input, starting standard (VR)
-    start "CosmoScout VR" cmd /c "cd /d "%BIN_PATH%" && hmd.bat"
-)
+echo Starting Cosmoscout...
+start "CosmoScout VR" cmd /c "cd /d "%BIN_PATH%" && hmd_icaros_mars.bat"
 
 echo.
 echo Started CosmoScout.
