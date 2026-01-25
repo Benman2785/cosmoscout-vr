@@ -7,19 +7,19 @@
 
 #include "ObserverNavigationNode.hpp"
 
+#include "../cs-core/Settings.hpp"
 #include "../cs-core/SolarSystem.hpp"
 #include "../cs-gui/GuiItem.hpp"
-#include "../cs-utils/convert.hpp"
 #include "../cs-scene/CelestialSurface.hpp"
-#include "../cs-core/Settings.hpp"
+#include "../cs-utils/convert.hpp"
 
 #include <VistaAspects/VistaPropertyAwareable.h>
 #include <glm/gtx/io.hpp>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ObserverNavigationNode::ObserverNavigationNode(
-    cs::core::SolarSystem* pSolarSystem, cs::core::Settings* pSettings, VistaPropertyList const& oParams)
+ObserverNavigationNode::ObserverNavigationNode(cs::core::SolarSystem* pSolarSystem,
+    cs::core::Settings* pSettings, VistaPropertyList const& oParams)
     : mSolarSystem(pSolarSystem)
     , mSettings(pSettings)
     , mTime(nullptr)
@@ -59,17 +59,16 @@ ObserverNavigationNode::ObserverNavigationNode(
   RegisterInPortPrototype("offset", new TVdfnPortTypeCompare<TVdfnPort<VistaVector3D>>);
 
   RegisterInPortPrototype("rotation_offset", new TVdfnPortTypeCompare<TVdfnPort<VistaQuaternion>>);
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool ObserverNavigationNode::PrepareEvaluationRun() {
-  mTime        = dynamic_cast<TVdfnPort<double>*>(GetInPort("time"));
-  mTranslation = dynamic_cast<TVdfnPort<VistaVector3D>*>(GetInPort("translation"));
-  mRotation    = dynamic_cast<TVdfnPort<VistaQuaternion>*>(GetInPort("rotation"));
-  mOffset      = dynamic_cast<TVdfnPort<VistaVector3D>*>(GetInPort("offset"));
-  mRotationOffset      = dynamic_cast<TVdfnPort<VistaQuaternion>*>(GetInPort("rotation_offset"));
+  mTime           = dynamic_cast<TVdfnPort<double>*>(GetInPort("time"));
+  mTranslation    = dynamic_cast<TVdfnPort<VistaVector3D>*>(GetInPort("translation"));
+  mRotation       = dynamic_cast<TVdfnPort<VistaQuaternion>*>(GetInPort("rotation"));
+  mOffset         = dynamic_cast<TVdfnPort<VistaVector3D>*>(GetInPort("offset"));
+  mRotationOffset = dynamic_cast<TVdfnPort<VistaQuaternion>*>(GetInPort("rotation_offset"));
 
   return GetIsValid();
 }
@@ -77,7 +76,7 @@ bool ObserverNavigationNode::PrepareEvaluationRun() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool ObserverNavigationNode::GetIsValid() const {
-  return ((mTranslation || mRotation || mRotationOffset || mOffset ) && mTime);
+  return ((mTranslation || mRotation || mRotationOffset || mOffset) && mTime);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -162,7 +161,7 @@ bool ObserverNavigationNode::DoEvalNode() {
   vTranslation *= dDeltaTime;
   vTranslation += vOffset;
 
-  auto& oObs        = mSolarSystem->getObserver();
+  auto&      oObs = mSolarSystem->getObserver();
   glm::dvec3 newPosition;
 
   newPosition = oObs.getPosition() + oObs.getRotation() * vTranslation * oObs.getScale();
@@ -202,14 +201,14 @@ bool ObserverNavigationNode::DoEvalNode() {
     }
 
     // local planetary surface radius
-    double surfaceRadius = glm::length(surfacePos - planetPos);
+    double surfaceRadius          = glm::length(surfacePos - planetPos);
     double surfaceRadiusEllipsoid = glm::length(surfacePosEllipsoid - planetPos);
 
     // current radius
     double rObserver = glm::length(vObserver);
 
     // current height above surface
-    double height = rObserver - surfaceRadius;
+    double height          = rObserver - surfaceRadius;
     double heightEllipsoid = rObserver - surfaceRadiusEllipsoid;
 
     double minHeight = 2000.0 * planet->getScale();
@@ -217,17 +216,17 @@ bool ObserverNavigationNode::DoEvalNode() {
 
     bool   changed      = false;
     double targetRadius = rObserver;
-    
+
     if (mLimitHeightMin && height < minHeight) {
       targetRadius = surfaceRadius + minHeight;
-      //logger().info("Min Height={}", targetRadius);
-      changed      = true;
+      // logger().info("Min Height={}", targetRadius);
+      changed = true;
     }
 
     if (mLimitHeightMax && heightEllipsoid > maxHeight) {
       targetRadius = surfaceRadiusEllipsoid + maxHeight;
-      //logger().info("Max Height={}", targetRadius);
-      changed      = true;
+      // logger().info("Max Height={}", targetRadius);
+      changed = true;
     }
 
     if (changed) {
@@ -239,13 +238,13 @@ bool ObserverNavigationNode::DoEvalNode() {
     }
   }
 
-  glm::dquat qRotationOffset(1 , 0 ,0 ,0);
+  glm::dquat qRotationOffset(1, 0, 0, 0);
 
   if (mRotationOffset) {
-    auto          tmp       = mRotationOffset->GetValue().GetNormalized().GetAxisAndAngle();
-    VistaVector3D axis      = tmp.m_v3Axis;
-    double        angle     = tmp.m_fAngle;
-    qRotationOffset = glm::angleAxis(angle, glm::dvec3(axis[0], axis[1], axis[2]));
+    auto          tmp   = mRotationOffset->GetValue().GetNormalized().GetAxisAndAngle();
+    VistaVector3D axis  = tmp.m_v3Axis;
+    double        angle = tmp.m_fAngle;
+    qRotationOffset     = glm::angleAxis(angle, glm::dvec3(axis[0], axis[1], axis[2]));
   }
 
   auto       qRotation     = mAngularDirection;
@@ -253,14 +252,14 @@ bool ObserverNavigationNode::DoEvalNode() {
   double     dRotationAngle =
       glm::angle(qRotation) * dDeltaTime * mMaxAngularSpeed * mAngularSpeed.get(dTtime);
 
-  auto newRotation =
-      glm::normalize(oObs.getRotation() * glm::angleAxis(dRotationAngle, vRotationAxis) * qRotationOffset);
+  auto newRotation = glm::normalize(
+      oObs.getRotation() * glm::angleAxis(dRotationAngle, vRotationAxis) * qRotationOffset);
 
-// --- STABILER CURVE-FLIGHT: sanfte Neigung an Planetenkrümmung ---
+  // --- STABILER CURVE-FLIGHT: sanfte Neigung an PlanetenkrÃ¼mmung ---
   if (mCurveFlight && mSolarSystem->pActiveObject.get()) {
 
     // Planetendaten
-    auto      planet       = mSolarSystem->pActiveObject.get();
+    auto       planet       = mSolarSystem->pActiveObject.get();
     glm::dvec3 planetCenter = planet->getPosition();
 
     // newPosition ist schon berechnet (Position wurde angewendet), benutze diese Position
@@ -287,7 +286,7 @@ bool ObserverNavigationNode::DoEvalNode() {
         // kleinster Rotationsaxis/angle von forward -> projected
         glm::dvec3 axis = glm::cross(forward, projected);
 
-        // Länge von axis ist sin(angle). Clamp um numerische Probleme zu vermeiden.
+        // Lï¿½nge von axis ist sin(angle). Clamp um numerische Probleme zu vermeiden.
         double sinAngle = glm::clamp(glm::length(axis), 0.0, 1.0);
         double angle    = std::asin(sinAngle);
 
@@ -296,8 +295,8 @@ bool ObserverNavigationNode::DoEvalNode() {
           axis = glm::normalize(axis);
 
           // --- WICHTIG: weiche Korrektur (tweakbar)
-          // 0.0 = keine Korrektur, 1.0 = vollständige sofortige Korrektur (würde flackern)
-          // Empfohlener Standard: 0.05 .. 0.2 (je nach gewünschtem "naklapp"-Gefühl)
+          // 0.0 = keine Korrektur, 1.0 = vollstï¿½ndige sofortige Korrektur (wï¿½rde flackern)
+          // Empfohlener Standard: 0.05 .. 0.2 (je nach gewï¿½nschtem "naklapp"-Gefï¿½hl)
           const double correctionFactor = 0.08; // <- anpassen wenn du aggressiver/leichter willst
 
           double appliedAngle = angle * correctionFactor;
@@ -312,16 +311,20 @@ bool ObserverNavigationNode::DoEvalNode() {
       }
     }
   }
-  
+
   // If mFixedHorizon is set, we rotate the observer so that the horizon of the active object is
   // always leveled. For now, this breaks if we are in outer space or looking straight up or down.
   // But it can be very useful in cases were we know that the user is always close to a planet.
   if (mFixedHorizon && mSolarSystem->pActiveObject.get()) {
     auto radii      = mSolarSystem->pActiveObject.get()->getRadii();
     auto surfacePos = cs::utils::convert::scaleToGeodeticSurface(newPosition, radii);
-    auto distance   = newPosition - surfacePos;
 
-    glm::dvec3 normal = glm::normalize(distance);
+    // can lead to normal pointing to the wrong direction
+    // auto distance   = newPosition - surfacePos;
+    // glm::dvec3 normal = glm::normalize(distance);
+
+    auto       planetCenter = mSolarSystem->pActiveObject.get()->getPosition();
+    glm::dvec3 normal       = glm::normalize(newPosition - planetCenter);
 
     glm::dvec3 z = (newRotation * glm::dvec4(0, 0, 1, 0)).xyz();
     glm::dvec3 x = -glm::cross(z, normal);
@@ -341,7 +344,8 @@ bool ObserverNavigationNode::DoEvalNode() {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ObserverNavigationNodeCreate::ObserverNavigationNodeCreate(cs::core::SolarSystem* pSolarSystem, cs::core::Settings* pSettings)
+ObserverNavigationNodeCreate::ObserverNavigationNodeCreate(
+    cs::core::SolarSystem* pSolarSystem, cs::core::Settings* pSettings)
     : mSolarSystem(pSolarSystem)
     , mSettings(pSettings) {
 }
