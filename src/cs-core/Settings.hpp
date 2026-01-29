@@ -202,6 +202,12 @@ class CS_CORE_EXPORT Settings {
   /// they should be considered readonly. If you want to modify the transformation of the virtual
   /// observer, use the api of the SolarSystem instead.
   struct Observer {
+    /// enables min height / planet collision
+    bool mLimitHeightMin = true;
+    
+    // enables max height on planet
+    bool mLimitHeightMax = true;
+
     /// The name of the SPICE center of the observer.
     utils::Property<std::string> pCenter;
 

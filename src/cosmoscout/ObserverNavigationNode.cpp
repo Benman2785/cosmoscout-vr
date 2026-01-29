@@ -31,8 +31,11 @@ ObserverNavigationNode::ObserverNavigationNode(cs::core::SolarSystem* pSolarSyst
           oParams.GetValueOrDefault<bool>("prevent_navigation_when_hovered_gui", true))
     , mFixedHorizon(oParams.GetValueOrDefault<bool>("fixed_horizon", true))
     , mCurveFlight(oParams.GetValueOrDefault<bool>("curve_flight", true))
-    , mLimitHeightMin(oParams.GetValueOrDefault<bool>("limit_height_min", true))
-    , mLimitHeightMax(oParams.GetValueOrDefault<bool>("limit_height_max", true))
+    
+    // Wir lesen nicht mehr aus oParams, sondern aus pSettings->mObserver
+    , mLimitHeightMin(pSettings->mObserver.mLimitHeightMin)
+    , mLimitHeightMax(pSettings->mObserver.mLimitHeightMax)
+
     , mMaxAngularSpeed(oParams.GetValueOrDefault<double>("max_angular_speed", glm::pi<double>()))
     , mMaxLinearSpeed(oParams.GetValueOrDefault<VistaVector3D>(
           "max_linear_speed", VistaVector3D(1.0, 1.0, 1.0)))

@@ -180,6 +180,8 @@ void to_json(nlohmann::json& j, Settings::GuiPosition const& o) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void from_json(nlohmann::json const& j, Settings::Observer& o) {
+  Settings::deserialize(j, "limitHeightMin", o.mLimitHeightMin);
+  Settings::deserialize(j, "limitHeightMax", o.mLimitHeightMax);
   Settings::deserialize(j, "center", o.pCenter);
   Settings::deserialize(j, "frame", o.pFrame);
   Settings::deserialize(j, "position", o.pPosition);
@@ -187,6 +189,8 @@ void from_json(nlohmann::json const& j, Settings::Observer& o) {
 }
 
 void to_json(nlohmann::json& j, Settings::Observer const& o) {
+  Settings::serialize(j, "limitHeightMin", o.mLimitHeightMin);
+  Settings::serialize(j, "limitHeightMax", o.mLimitHeightMax);
   Settings::serialize(j, "center", o.pCenter);
   Settings::serialize(j, "frame", o.pFrame);
   Settings::serialize(j, "position", o.pPosition);

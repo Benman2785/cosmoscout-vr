@@ -12,6 +12,7 @@ if (WIN32)
   install(FILES "scripts/hmd.bat"                     DESTINATION "bin")
   install(FILES "scripts/hmd_icaros_earth.bat"                     DESTINATION "bin")
   install(FILES "scripts/hmd_icaros_mars.bat"                     DESTINATION "bin")
+    install(FILES "scripts/hmd_icaros_mars-OHNE-FEATURES.bat"                     DESTINATION "bin")
   
 
   if (COSMOSCOUT_UNIT_TESTS)
@@ -37,6 +38,7 @@ endif()
 # install files for all platforms ------------------------------------------------------------------
 install(FILES "scene/icaros_earth_hmd.json" DESTINATION "share/config")
 install(FILES "scene/icaros_mars_hmd.json" DESTINATION "share/config")
+install(FILES "scene/icaros_mars_hmd_minimum.json" DESTINATION "share/config")
 install(FILES "scene/simple_desktop.json" DESTINATION "share/config")
 install(FILES "scene/simple_hmd.json"     DESTINATION "share/config")
 install(DIRECTORY "vista"                 DESTINATION "share/config")
