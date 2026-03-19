@@ -98,7 +98,7 @@ IF NOT EXIST glew-2.2.0-win32.zip (
 )
 
 cd "%BUILD_DIR%/glew/extracted"
-cmake -E tar xfvj ../glew-2.2.0-win32.zip
+cmake -E tar xfj ../glew-2.2.0-win32.zip
 cd ..
 
 cmake -E copy_directory "%BUILD_DIR%/glew/extracted/glew-2.2.0/include"         "%INSTALL_DIR%/include" || goto :error
@@ -350,7 +350,7 @@ IF NOT EXIST cspice.zip (
 )
 
 cd "%BUILD_DIR%/cspice/extracted"
-cmake -E tar xfvj ../cspice.zip -- cspice/src/cspice cspice/include
+cmake -E tar xfj ../cspice.zip -- cspice/src/cspice cspice/include
 cd cspice
 
 echo project(cspice C) > "CMakeLists.txt"
@@ -390,7 +390,7 @@ IF NOT EXIST bzip2.zip (
 )
 
 cd "%BUILD_DIR%/cef/bzip2"
-cmake -E tar xfvj ../bzip2.zip
+cmake -E tar xfj ../bzip2.zip
 cd ..
 
 echo.
@@ -410,7 +410,7 @@ IF NOT EXIST cef.tar (
 )
 
 cd "%BUILD_DIR%/cef/extracted"
-cmake -E tar xfvj ../cef.tar
+cmake -E tar xfj ../cef.tar
 
 rem We don't want the example applications.
 cmake -E remove_directory %CEF_DIR%/tests
