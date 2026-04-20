@@ -877,7 +877,7 @@
         },
       "Mars": {
         "topAltitude": 240000,
-        "bottomAltitude": -4500,
+        "bottomAltitude": -13500,
         "model": "Bruneton",
         "modelSettings": {
           "dataDirectory": "../share/resources/atmosphere-data/mars"
