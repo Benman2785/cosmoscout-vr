@@ -4,8 +4,8 @@ Ein CosmoScout-VR-Plugin für einen einfachen **Messe-Modus** mit
 
 - globalem Hotkey `M`
 - 30s Eingewöhnungsphase
-- frei fliegendem Flug-Timer
-- Nachladen per `1 / 2 / 3 / 5`, aber nur unterhalb eines Restzeit-Schwellenwerts
+- Flug-Timer
+- "Nachladen" per `1 / 2 / 3 / 5`, aber nur unterhalb eines Restzeit-Schwellenwerts
 - screen-space HUD mit animierter GIF (dadurch headset-/blickgebunden)
 
 ## Implementierte Logik
@@ -16,11 +16,11 @@ Die Beschreibung der Hotkey-Abfolge war nicht ganz eindeutig. Diese Umsetzung ve
 2. `1 / 2 / 3 / 5` startet die Eingewöhnungsphase und merkt sich eine Vorauswahl.
 3. Nach der Eingewöhnung startet ein weiterer Druck auf `1 / 2 / 3 / 5` den eigentlichen Flug-Timer.
 4. Während der aktiven Flugphase addieren `1 / 2 / 3 / 5` Zeit **nur dann**, wenn die Restzeit unter `addThresholdSeconds` liegt.
-5. Optional kann per `autoStartAfterWarmup` eingestellt werden, dass die in Schritt 2 gewählte Zeit automatisch direkt nach der Eingewöhnung startet.
+5. Optional kann per `autoStartAfterWarmup` eingestellt werden, dass die Zeit direkt nach der Eingewöhnung startet.
 
 ## Installation
 
-Ordner nach `cosmoscout-vr/plugins/csp-messe` kopieren und CosmoScout VR normal mitbauen.
+Ordner nach `cosmoscout-vr/plugins/csp-messe` kopieren und CosmoScout VR normal kompilieren.
 
 ## Beispiel-Konfiguration
 
