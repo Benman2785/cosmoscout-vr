@@ -123,7 +123,7 @@ void Plugin::update() {
     } else {
       mPhase = Phase::eArmed;
       mGuiManager->showNotification(
-          "Messe-Modus", "Eingewöhnungsphase beendet – 1 / 2 / 3 / 5 startet den Flug-Timer.",
+          "Messe-Modus", "Eingewöhnungsphase beendet.",
           "timer");
       pushOverlayState(true);
     }
