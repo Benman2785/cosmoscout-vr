@@ -207,8 +207,7 @@ void Plugin::enterMesseMode() {
   resetSession(Phase::eAwaitWarmupSelection);
 
   mGuiManager->showNotification(
-      "Messe-Modus", "Aktiviert – jetzt 1 / 2 / 3 / 5 wählen, um die Eingewöhnungsphase zu "
-                     "starten.",
+      "Messe-Modus", "Messe Modus aktiv",
       "timer");
   pushOverlayState(true);
 }
@@ -238,8 +237,7 @@ void Plugin::handleTimeHotkey(int minutes) {
     mPreparedMinutes = minutes;
     mGuiManager->showNotification(
         "Messe-Modus",
-        fmt::format("Vorauswahl aktualisiert: {} min. Nach der Eingewöhnungsphase erneut 1 / 2 / "
-                    "3 / 5 drücken.",
+        fmt::format("Vorauswahl aktualisiert: {} min.",
                     minutes),
         "schedule");
     pushOverlayState(true);
@@ -295,7 +293,7 @@ void Plugin::finishRun() {
   resetSession(Phase::eFinished);
 
   mGuiManager->showNotification(
-      "Flug-Zeit abgelaufen", "Die Runde ist beendet. Mit M startest du eine neue Messesession.",
+      "Flug-Zeit abgelaufen", "Die Runde ist beendet.",
       "timer_off");
   pushOverlayState(true);
 }
@@ -485,7 +483,3 @@ void Plugin::pushOverlayState(bool force) {
 
   mLastOverlayPush = now;
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-} // namespace csp::messe
