@@ -795,6 +795,7 @@
       "maxGPUTilesDEM": 1024,
       "tileResolutionDEM": 128,
       "tileResolutionIMG": 256,
+      "autoLodRange": [25, 40],
       "mapCache": "map-cache/",
       "bodies": {
         "Earth": {
@@ -867,20 +868,22 @@
     "csp-atmospheres": {
       "atmospheres": {
         "Earth": {
-          "cloudTexture": "../share/resources/textures/earth-clouds.jpg",
-          "topAltitude": 510000,
-          "bottomAltitude": 0,
-          "model": "Bruneton",
+          "topAltitude": 550000.0,
+          "bottomAltitude": -900.0,
+	  "cloudTexture": "../share/resources/textures/earth-clouds.jpg",
+	  "cloudAltitude": 32500.0,          
+	  "model": "Bruneton",
           "modelSettings": {
             "dataDirectory": "../share/resources/atmosphere-data/earth"
           }
         },
-      "Mars": {
-        "topAltitude": 240000,
-        "bottomAltitude": -4500,
-        "model": "Bruneton",
-        "modelSettings": {
-          "dataDirectory": "../share/resources/atmosphere-data/mars"
+        "Mars": {
+          "topAltitude": 420000.0,
+          "bottomAltitude": -90000.0,
+          "model": "Bruneton",
+          "modelSettings": {
+            "dataDirectory": "../share/resources/atmosphere-data/mars"
+          }
         }
       }
     },
@@ -996,6 +999,19 @@
           "primeMeridianInCenter": false
         }
       }
+    },
+    "csp-messe": {
+      "showHudInIdle": true,
+      "autoStartAfterWarmup": true,
+      "warmupSeconds": 30.0,
+      "addThresholdSeconds": 90.0,
+      "hudGifPath": "../share/resources/gui/img/csp-messe.gif",
+      "hudWidth": 2500,
+      "hudHeight": 1920,
+      "hudDistanceMeters": 3.0,
+      "hudVerticalOffsetMeters": -0.33,
+      "hudScale": 1.00,
+      "ignoreDepth": true
     },
     "csp-rings": {
       "rings": {

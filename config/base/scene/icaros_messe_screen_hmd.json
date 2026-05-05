@@ -1,35 +1,72 @@
 {
-  "startDate": "today",
+  "startDate": "2025-12-19T06:39:22.640Z",
   "resetDate": "today",
   "minDate": "1950-01-02 00:00:00.000",
   "maxDate": "2049-12-31 00:00:00.000",
   "observer": {
-    "center": "Earth",
-    "frame": "IAU_Earth",
+    "limitHeightMin": true,
+    "limitHeightMax": true,
+    "center": "Mars",
+    "frame": "IAU_Mars",
     "position": [
-      5915095.557596171,
-      10658059.249942748,
-      15601636.827477392
+      -3392355.1690661423,
+      -1032343.223424367,
+      -725348.5520523991
     ],
     "rotation": [
-      -0.27581807466282293,
-      0.1729750618085246,
-      0.05053096202800651,
-      0.9441666376006699
+      0.46129947900648227,
+      -0.4386403988928737,
+      0.6556030434627033,
+      0.40617981305068507
     ]
   },
   "sceneScale": {
-    "minScale": 1.0,
-    "maxScale": 1e17,
-    "closeVisualDistance": 5.0,
-    "farVisualDistance": 5.0,
-    "closeRealDistance": 1.0,
-    "farRealDistance": 1.0,
+    "minScale": 10,
+    "maxScale": 10,
+    "closeVisualDistance": 2,
+    "farVisualDistance": 5,
+    "closeRealDistance": 2,
+    "farRealDistance": 10000000,
     "lockWeight": 0.1,
     "trackWeight": 0.0002,
-    "minObjectSize": 10000.0
+    "minObjectSize": 100000.0
+  },
+  "enableMouseRay": true,
+  "enableSensorSizeControl": false,
+  "guiPosition": {
+    "heightMeter": 1.8,
+    "heightPixel": 1200,
+    "posXMeter": 0.0,
+    "posYMeter": 1.2,
+    "posZMeter": -1.0,
+    "rotX": 0.0,
+    "rotY": 0.0,
+    "rotZ": 0.0,
+    "widthMeter": 2.4,
+    "widthPixel": 1600
   },
   "bookmarks": [
+    {
+      "name": "Startposition Mars",
+      "time": {
+        "start": "2025-12-19T06:39:22.640Z"
+      },
+      "location": {
+        "center": "Mars",
+        "frame": "IAU_Mars",
+        "position": [
+          -3392355.1690661423,
+          -1032343.223424367,
+          -725348.5520523991
+        ],
+        "rotation": [
+          0.46129947900648227,
+          -0.4386403988928737,
+          0.6556030434627033,
+          0.40617981305068507
+        ]
+      }
+    },
     {
       "name": "Mercury",
       "icon": "mercury.png",
@@ -280,15 +317,12 @@
   ],
   "spiceKernel": "../share/config/spice/simple.txt",
   "graphics": {
-    "enableHDR": true,
+    "heightScale": 3,
+    "viewPitchOffset": 30,
     "eclipseShadowMaps": {
-      "Earth": {
-        "texture":"../share/resources/textures/earthShadow.tif"
-      },
+      "Earth": {},
       "Moon": {},
-      "Mars": {
-        "texture":"../share/resources/textures/marsShadow.tif"
-      },
+      "Mars": {},
       "Phobos": {},
       "Deimos": {},
       "Jupiter": {},
@@ -756,6 +790,62 @@
   },
   "plugins": {
     "csp-timings": {},
+    "csp-lod-bodies": {
+      "maxGPUTilesColor": 1024,
+      "maxGPUTilesDEM": 1024,
+      "tileResolutionDEM": 128,
+      "tileResolutionIMG": 256,
+      "autoLodRange": [25, 40],
+      "mapCache": "map-cache/",
+      "bodies": {
+        "Earth": {
+          "activeImgDataset": "Blue Marble",
+          "activeDemDataset": "ETOPO1",
+          "imgDatasets": {
+            "Blue Marble": {
+              "copyright": "NASA",
+              "url": "http://localhost:8080/cgi-bin/mapserv?map=/mapserver-datasets/meta.map&service=wms",
+              "layers": "earth.bluemarble.rgb",
+              "maxLevel": 6
+            },
+            "Natural Earth": {
+              "copyright": "NASA",
+              "url": "http://localhost:8080/cgi-bin/mapserv?map=/mapserver-datasets/meta.map&service=wms",
+              "layers": "earth.naturalearth.rgb",
+              "maxLevel": 6
+            }
+          },
+          "demDatasets": {
+            "ETOPO1": {
+              "copyright": "NOAA",
+              "url": "http://localhost:8080/cgi-bin/mapserv?map=/mapserver-datasets/meta.map&service=wms",
+              "layers": "earth.etopo1.dem",
+              "maxLevel": 6
+            }
+          }
+        },
+        "Mars": {
+          "activeImgDataset": "Blue Marble",
+          "activeDemDataset": "ETOPO1",
+          "imgDatasets": {
+            "Viking": {
+              "copyright": "NASA",
+              "url": "http://localhost:8080/cgi-bin/mapserv?map=/mapserver-datasets/meta.map&service=wms",
+              "layers": "mars.viking.rgb",
+              "maxLevel": 6
+            }
+          },
+          "demDatasets": {
+            "ETOPO1": {
+              "copyright": "NOAA",
+              "url": "http://localhost:8080/cgi-bin/mapserv?map=/mapserver-datasets/meta.map&service=wms",
+              "layers": "mars.etopo1.dem",
+              "maxLevel": 6
+            }
+          }
+        }
+      }
+    },
     "csp-stars": {
       "celestialGridTexture": "../share/resources/textures/celestial_grid.png",
       "starFiguresTexture": "../share/resources/textures/constellation_figures.png",
@@ -778,18 +868,18 @@
     "csp-atmospheres": {
       "atmospheres": {
         "Earth": {
-          "cloudTexture": "../share/resources/textures/earth-clouds.jpg",
-          "limbLuminanceTexture": "../share/resources/textures/earthLimbLuminance.tif",
-          "topAltitude": 80000,
-          "bottomAltitude": -100,
-          "model": "Bruneton",
+          "topAltitude": 550000.0,
+          "bottomAltitude": -900.0,
+	  "cloudTexture": "../share/resources/textures/earth-clouds.jpg",
+	  "cloudAltitude": 32500.0,          
+	  "model": "Bruneton",
           "modelSettings": {
             "dataDirectory": "../share/resources/atmosphere-data/earth"
           }
         },
         "Mars": {
-          "topAltitude": 80000,
-          "bottomAltitude": -4500,
+          "topAltitude": 550000.0,
+          "bottomAltitude": -60000.0,
           "model": "Bruneton",
           "modelSettings": {
             "dataDirectory": "../share/resources/atmosphere-data/mars"
@@ -809,14 +899,8 @@
         "Venus": {
           "texture": "../share/resources/textures/venus.jpg"
         },
-        "Earth": {
-          "texture": "../share/resources/textures/earth.jpg"
-        },
         "Moon": {
           "texture": "../share/resources/textures/moon.jpg"
-        },
-        "Mars": {
-          "texture": "../share/resources/textures/mars.jpg"
         },
         "Phobos": {
           "texture": "../share/resources/textures/phobos.jpg"
@@ -916,6 +1000,19 @@
         }
       }
     },
+    "#csp-messe": {
+      "showHudInIdle": true,
+      "autoStartAfterWarmup": true,
+      "warmupSeconds": 10.0,
+      "addThresholdSeconds": 15.0,
+      "hudGifPath": "../share/resources/gui/img/csp-messe.gif",
+      "hudWidth": 7500,
+      "hudHeight": 5760,
+      "hudDistanceMeters": 3.0,
+      "hudVerticalOffsetMeters": -0.33,
+      "hudScale": 1.00,
+      "ignoreDepth": true
+    },
     "csp-rings": {
       "rings": {
         "Saturn": {
@@ -944,14 +1041,27 @@
       ]
     },
     "csp-trajectories": {
+      "enableTrajectories": false,
       "trajectories": {
         "Sun": {
-          "color": [1, 1, 1],
+          "color": [
+            1,
+            1,
+            1
+          ],
           "drawLDRFlare": true
         },
         "Mercury": {
-          "color": [0.7, 0.6, 0.3],
-          "flareColor": [0.5, 0.5, 0.5],
+          "color": [
+            0.7,
+            0.6,
+            0.3
+          ],
+          "flareColor": [
+            0.5,
+            0.5,
+            0.5
+          ],
           "trail": {
             "length": 87.9,
             "samples": 1000,
@@ -959,8 +1069,16 @@
           }
         },
         "Venus": {
-          "color": [0.9, 0.75, 0.5],
-          "flareColor": [0.7, 0.6, 0.3],
+          "color": [
+            0.9,
+            0.75,
+            0.5
+          ],
+          "flareColor": [
+            0.7,
+            0.6,
+            0.3
+          ],
           "trail": {
             "length": 224.5,
             "samples": 1000,
@@ -968,8 +1086,16 @@
           }
         },
         "Earth": {
-          "color": [0.5, 1.0, 0.4],
-          "flareColor": [0.5, 0.5, 0.6],
+          "color": [
+            0.5,
+            1.0,
+            0.4
+          ],
+          "flareColor": [
+            0.5,
+            0.5,
+            0.6
+          ],
           "trail": {
             "length": 365.0,
             "samples": 5000,
@@ -977,8 +1103,16 @@
           }
         },
         "Moon": {
-          "color": [0.8, 0.8, 0.8],
-          "flareColor": [0.5, 0.5, 0.5],
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "flareColor": [
+            0.5,
+            0.5,
+            0.5
+          ],
           "trail": {
             "length": 28.0,
             "samples": 1000,
@@ -986,8 +1120,16 @@
           }
         },
         "Mars": {
-          "color": [1.0, 0.4, 0.3],
-          "flareColor": [0.8, 0.4, 0.3],
+          "color": [
+            1.0,
+            0.4,
+            0.3
+          ],
+          "flareColor": [
+            0.8,
+            0.4,
+            0.3
+          ],
           "trail": {
             "length": 686.0,
             "samples": 5000,
@@ -995,8 +1137,16 @@
           }
         },
         "Phobos": {
-          "color": [0.6, 0.8, 0.6],
-          "flareColor": [0.5, 0.5, 0.5],
+          "color": [
+            0.6,
+            0.8,
+            0.6
+          ],
+          "flareColor": [
+            0.5,
+            0.5,
+            0.5
+          ],
           "trail": {
             "length": 0.31,
             "samples": 200,
@@ -1004,8 +1154,16 @@
           }
         },
         "Deimos": {
-          "color": [0.65, 0.61, 0.56],
-          "flareColor": [0.5, 0.5, 0.5],
+          "color": [
+            0.65,
+            0.61,
+            0.56
+          ],
+          "flareColor": [
+            0.5,
+            0.5,
+            0.5
+          ],
           "trail": {
             "length": 1.26,
             "samples": 200,
@@ -1013,8 +1171,16 @@
           }
         },
         "Ceres": {
-          "color": [0.4, 0.4, 0.4],
-          "flareColor": [0.5, 0.5, 0.5],
+          "color": [
+            0.4,
+            0.4,
+            0.4
+          ],
+          "flareColor": [
+            0.5,
+            0.5,
+            0.5
+          ],
           "trail": {
             "length": 1680,
             "samples": 1000,
@@ -1022,8 +1188,16 @@
           }
         },
         "Vesta": {
-          "color": [0.5, 0.5, 0.5],
-          "flareColor": [0.5, 0.5, 0.5],
+          "color": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "flareColor": [
+            0.5,
+            0.5,
+            0.5
+          ],
           "trail": {
             "length": 1326,
             "samples": 1000,
@@ -1031,8 +1205,16 @@
           }
         },
         "Jupiter": {
-          "color": [1.0, 0.7, 0.5],
-          "flareColor": [0.8, 0.7, 0.6],
+          "color": [
+            1.0,
+            0.7,
+            0.5
+          ],
+          "flareColor": [
+            0.8,
+            0.7,
+            0.6
+          ],
           "trail": {
             "length": 4330,
             "samples": 1000,
@@ -1040,8 +1222,16 @@
           }
         },
         "Io": {
-          "color": [0.95, 0.9, 0.5],
-          "flareColor": [0.7, 0.6, 0.5],
+          "color": [
+            0.95,
+            0.9,
+            0.5
+          ],
+          "flareColor": [
+            0.7,
+            0.6,
+            0.5
+          ],
           "trail": {
             "length": 1.75,
             "samples": 200,
@@ -1049,8 +1239,16 @@
           }
         },
         "Europa": {
-          "color": [0.62, 0.82, 0.84],
-          "flareColor": [0.7, 0.7, 0.65],
+          "color": [
+            0.62,
+            0.82,
+            0.84
+          ],
+          "flareColor": [
+            0.7,
+            0.7,
+            0.65
+          ],
           "trail": {
             "length": 3.55,
             "samples": 200,
@@ -1058,8 +1256,16 @@
           }
         },
         "Ganymede": {
-          "color": [0.95, 0.93, 0.93],
-          "flareColor": [0.4, 0.3, 0.25],
+          "color": [
+            0.95,
+            0.93,
+            0.93
+          ],
+          "flareColor": [
+            0.4,
+            0.3,
+            0.25
+          ],
           "trail": {
             "length": 7.15,
             "samples": 200,
@@ -1067,8 +1273,16 @@
           }
         },
         "Callisto": {
-          "color": [0.32, 0.26, 0.21],
-          "flareColor": [0.35, 0.3, 0.2],
+          "color": [
+            0.32,
+            0.26,
+            0.21
+          ],
+          "flareColor": [
+            0.35,
+            0.3,
+            0.2
+          ],
           "trail": {
             "length": 16.69,
             "samples": 200,
@@ -1076,8 +1290,16 @@
           }
         },
         "Saturn": {
-          "color": [1.0, 0.9, 0.3],
-          "flareColor": [0.8, 0.75, 0.6],
+          "color": [
+            1.0,
+            0.9,
+            0.3
+          ],
+          "flareColor": [
+            0.8,
+            0.75,
+            0.6
+          ],
           "trail": {
             "length": 10749,
             "samples": 1000,
@@ -1085,8 +1307,16 @@
           }
         },
         "Mimas": {
-          "color": [0.47, 0.44, 0.32],
-          "flareColor": [0.4, 0.4, 0.4],
+          "color": [
+            0.47,
+            0.44,
+            0.32
+          ],
+          "flareColor": [
+            0.4,
+            0.4,
+            0.4
+          ],
           "trail": {
             "length": 0.94,
             "samples": 200,
@@ -1094,8 +1324,16 @@
           }
         },
         "Enceladus": {
-          "color": [0.62, 0.82, 0.84],
-          "flareColor": [0.5, 0.5, 0.5],
+          "color": [
+            0.62,
+            0.82,
+            0.84
+          ],
+          "flareColor": [
+            0.5,
+            0.5,
+            0.5
+          ],
           "trail": {
             "length": 1.37,
             "samples": 200,
@@ -1103,8 +1341,16 @@
           }
         },
         "Tethys": {
-          "color": [0.4, 0.4, 0.3],
-          "flareColor": [0.4, 0.4, 0.4],
+          "color": [
+            0.4,
+            0.4,
+            0.3
+          ],
+          "flareColor": [
+            0.4,
+            0.4,
+            0.4
+          ],
           "trail": {
             "length": 1.9,
             "samples": 200,
@@ -1112,8 +1358,16 @@
           }
         },
         "Dione": {
-          "color": [0.87, 0.87, 0.85],
-          "flareColor": [0.4, 0.4, 0.4],
+          "color": [
+            0.87,
+            0.87,
+            0.85
+          ],
+          "flareColor": [
+            0.4,
+            0.4,
+            0.4
+          ],
           "trail": {
             "length": 2.74,
             "samples": 200,
@@ -1121,8 +1375,16 @@
           }
         },
         "Rhea": {
-          "color": [0.52, 0.49, 0.35],
-          "flareColor": [0.4, 0.4, 0.4],
+          "color": [
+            0.52,
+            0.49,
+            0.35
+          ],
+          "flareColor": [
+            0.4,
+            0.4,
+            0.4
+          ],
           "trail": {
             "length": 4.52,
             "samples": 200,
@@ -1130,8 +1392,16 @@
           }
         },
         "Titan": {
-          "color": [0.89, 0.8, 0.4],
-          "flareColor": [0.4, 0.4, 0.4],
+          "color": [
+            0.89,
+            0.8,
+            0.4
+          ],
+          "flareColor": [
+            0.4,
+            0.4,
+            0.4
+          ],
           "trail": {
             "length": 15.95,
             "samples": 200,
@@ -1139,8 +1409,16 @@
           }
         },
         "Iapetus": {
-          "color": [0.27, 0.26, 0.16],
-          "flareColor": [0.4, 0.4, 0.4],
+          "color": [
+            0.27,
+            0.26,
+            0.16
+          ],
+          "flareColor": [
+            0.4,
+            0.4,
+            0.4
+          ],
           "trail": {
             "length": 79.3,
             "samples": 200,
@@ -1148,8 +1426,16 @@
           }
         },
         "Uranus": {
-          "color": [0.5, 0.8, 1.0],
-          "flareColor": [0.7, 0.85, 0.9],
+          "color": [
+            0.5,
+            0.8,
+            1.0
+          ],
+          "flareColor": [
+            0.7,
+            0.85,
+            0.9
+          ],
           "trail": {
             "length": 17885,
             "samples": 1000,
@@ -1157,8 +1443,16 @@
           }
         },
         "Miranda": {
-          "color": [1.0, 0.8, 1.0],
-          "flareColor": [0.4, 0.4, 0.4],
+          "color": [
+            1.0,
+            0.8,
+            1.0
+          ],
+          "flareColor": [
+            0.4,
+            0.4,
+            0.4
+          ],
           "trail": {
             "length": 1.41,
             "samples": 200,
@@ -1166,8 +1460,16 @@
           }
         },
         "Ariel": {
-          "color": [0.84, 0.72, 0.67],
-          "flareColor": [0.4, 0.4, 0.4],
+          "color": [
+            0.84,
+            0.72,
+            0.67
+          ],
+          "flareColor": [
+            0.4,
+            0.4,
+            0.4
+          ],
           "trail": {
             "length": 2.52,
             "samples": 200,
@@ -1175,8 +1477,16 @@
           }
         },
         "Umbriel": {
-          "color": [0.23, 0.38, 0.45],
-          "flareColor": [0.4, 0.4, 0.4],
+          "color": [
+            0.23,
+            0.38,
+            0.45
+          ],
+          "flareColor": [
+            0.4,
+            0.4,
+            0.4
+          ],
           "trail": {
             "length": 4.14,
             "samples": 200,
@@ -1184,8 +1494,16 @@
           }
         },
         "Titania": {
-          "color": [1.0, 0.93, 0.8],
-          "flareColor": [0.4, 0.4, 0.4],
+          "color": [
+            1.0,
+            0.93,
+            0.8
+          ],
+          "flareColor": [
+            0.4,
+            0.4,
+            0.4
+          ],
           "trail": {
             "length": 8.71,
             "samples": 200,
@@ -1193,8 +1511,16 @@
           }
         },
         "Oberon": {
-          "color": [0.51, 0.44, 0.45],
-          "flareColor": [0.4, 0.4, 0.4],
+          "color": [
+            0.51,
+            0.44,
+            0.45
+          ],
+          "flareColor": [
+            0.4,
+            0.4,
+            0.4
+          ],
           "trail": {
             "length": 13.5,
             "samples": 200,
@@ -1202,8 +1528,16 @@
           }
         },
         "Neptune": {
-          "color": [0.2, 0.2, 0.5],
-          "flareColor": [0.2, 0.4, 0.8],
+          "color": [
+            0.2,
+            0.2,
+            0.5
+          ],
+          "flareColor": [
+            0.2,
+            0.4,
+            0.8
+          ],
           "trail": {
             "length": 17885,
             "samples": 1000,
@@ -1211,8 +1545,16 @@
           }
         },
         "Triton": {
-          "color": [0.49, 0.52, 0.49],
-          "flareColor": [0.7, 0.7, 0.6],
+          "color": [
+            0.49,
+            0.52,
+            0.49
+          ],
+          "flareColor": [
+            0.7,
+            0.7,
+            0.6
+          ],
           "trail": {
             "length": 5.88,
             "samples": 200,
@@ -1220,8 +1562,16 @@
           }
         },
         "Pluto": {
-          "color": [0.85, 0.8, 0.72],
-          "flareColor": [0.6, 0.45, 0.4],
+          "color": [
+            0.85,
+            0.8,
+            0.72
+          ],
+          "flareColor": [
+            0.6,
+            0.45,
+            0.4
+          ],
           "trail": {
             "length": 18250,
             "samples": 1000,
@@ -1229,8 +1579,16 @@
           }
         },
         "Charon": {
-          "color": [0.55, 0.55, 0.55],
-          "flareColor": [0.4, 0.4, 0.4],
+          "color": [
+            0.55,
+            0.55,
+            0.55
+          ],
+          "flareColor": [
+            0.4,
+            0.4,
+            0.4
+          ],
           "trail": {
             "length": 6.39,
             "samples": 200,
@@ -1279,17 +1637,48 @@
       }
     },
     "csp-vr-accessibility": {
+      "viewOffset": {
+        "enabled": true,
+        "pitch": 0.0
+      },
+      "motionPoints": {
+        "enabled": false,
+        "count": 250,
+        "radius": 10.0,
+        "size": 10.0,
+        "color": "#ffffff"
+      },
+      "virtualHorizon": {
+        "enabled": true,
+        "size": 1,
+        "offset": 0,
+        "extent": 10.0,
+        "texture": "../share/resources/textures/virtualHorizonLarge.png",
+        "alpha": 1.0,
+        "color": "#ffffff"
+      },
+      "crosshair": {
+        "enabled": true,
+        "size": 1,
+        "offset": 0,
+        "extent": 10.0,
+        "texture": "../share/resources/textures/CrosshairLarge.png",
+        "alpha": 1.0,
+        "color": "#ffffff",
+        "rollBaseFactor": -0.3,
+        "rollAmplifier": 1.3
+      },
       "grid": {
         "enabled": false,
         "size": 0.5,
-        "offset": -1.80,
+        "offset": 0,
         "extent": 10.0,
         "texture": "../share/resources/textures/gridCrossLarge.png",
         "alpha": 1.0,
-        "color": "#ccccff"
+        "color": "#ffffff"
       },
       "vignette": {
-        "enabled": false,
+        "enabled": true,
         "debug": false,
         "radii": [
           0.5,
@@ -1300,7 +1689,7 @@
         "fadeDeadzone": 0.5,
         "velocityThresholds": [
           0.2,
-          10.0
+          2.0
         ],
         "useDynamicRadius": false,
         "useVerticalOnly": false
