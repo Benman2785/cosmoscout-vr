@@ -28,15 +28,16 @@ Diese Fassung hängt das HUD **nicht** mehr als HTML-Box an die normale CosmoSco
     "csp-messe": {
       "showHudInIdle": true,
       "autoStartAfterWarmup": true,
-      "warmupSeconds": 15.0,
-      "addThresholdSeconds": 15.0,
-      "hudGifPath": "../share/resources/gui/img/csp-messe.gif",
-      "hudWidth": 7500,
-      "hudHeight": 5760,
+      "warmupSeconds": 0.01,
+      "addThresholdSeconds": 45.0,
+      "hudGifPath": "../share/resources/gui/img/csp-messe.webp",
+      "hudWidth": 4800,
+      "hudHeight": 2500,
       "hudDistanceMeters": 3.0,
-      "hudVerticalOffsetMeters": -0.33,
-      "hudScale": 1.00,
-      "ignoreDepth": true
+      "hudVerticalOffsetMeters": 1.25,
+      "hudScale": 2.50,
+      "heightScale": 3.0,
+      "ignoreDepth": false
     },
   }
 }

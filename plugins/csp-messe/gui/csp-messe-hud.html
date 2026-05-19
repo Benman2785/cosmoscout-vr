@@ -2,229 +2,241 @@
 <html>
 
 <head>
-  <meta charset="utf-8">
-  <style>
-    :root {
-      /* === Hauptblock: Phase / Timer === */
-      --root-left: 4380px;
-      --root-top: 2320px;
-      --root-transform: none;
-
-      /* === Höhe einzeln verschieben === */
-      --altitude-left: 2635px;
-      --altitude-top: 2320px;
-      --altitude-transform: none;
-
-      /* === Geschwindigkeit einzeln verschieben === */
-      --speed-left: 2635px;
-      --speed-top: 3270px;
-      --speed-transform: none;
-
-      /* === Bildschirm-Abdunklung === */
-      --screen-dim-color: 25, 25, 25;
-      --screen-dim-opacity: 0.85;
-    }
-
-    html,
-    body {
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      background: transparent;
-      background-image: url("img/csp-messe.gif");
-      background-size: 2400px 1920px;
-      background-position: center;
-      background-repeat: no-repeat;
-      overflow: auto;
-      font-family: sans-serif;
-    }
-
-    body {
-      position: relative;
-    }
-
-    #root {
-      position: absolute;
-      left: var(--root-left);
-      top: var(--root-top);
-      transform: var(--root-transform);
-      color: white;
-      padding: 18px;
-      width: 500px;
-      box-sizing: border-box;
-      text-align: center;
-    }
-
-    #phase {
-      font-size: 28px;
-      margin-top: 8px;
-    }
-
-    #time {
-      font-size: 56px;
-      font-weight: bold;
-      margin-top: 10px;
-    }
-
-    #hint {
-      font-size: 20px;
-      margin-top: 8px;
-    }
-
-    #screen-dimmer {
-      position: fixed;
-      left: 0;
-      top: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(var(--screen-dim-color), var(--screen-dim-opacity));
-      pointer-events: none;
-      z-index: 9999;
-      opacity: 0;
-      transition: opacity 0.6s ease;
-    }
-
-    #screen-dimmer.is-active {
-      opacity: 1;
-    }
-
-    .metric {
-      position: absolute;
-      min-width: 250px;
-      color: white;
-      padding: 10px 12px;
-      box-sizing: border-box;
-      text-align: center;
-    }
-
-    #altitude-metric {
-      left: var(--altitude-left);
-      top: var(--altitude-top);
-      transform: var(--altitude-transform);
-    }
-
-    #speed-metric {
-      left: var(--speed-left);
-      top: var(--speed-top);
-      transform: var(--speed-transform);
-    }
-
-    .metric-label {
-      font-size: 20px;
-      opacity: 0.8;
-    }
-
-    .metric-value {
-      font-size: 56px;
-      font-weight: bold;
-      margin-top: 10px;
-      white-space: nowrap;
-    }
-  </style>
+    <meta charset="utf-8">
+    <style>
+         :root {
+            /* === Hauptblock: Phase / Timer === */
+            --root-left: 3030px;
+            --root-top: 680px;
+            --root-transform: none;
+            /* === Höhe einzeln verschieben === */
+            --altitude-left: 1360px;
+            --altitude-top: 690px;
+            --altitude-transform: none;
+            /* === Geschwindigkeit einzeln verschieben === */
+            --speed-left: 1300px;
+            --speed-top: 1540px;
+            --speed-transform: none;
+            /* === Bildschirm-Abdunklung === */
+            --screen-dim-color: 25, 25, 25;
+            --screen-dim-opacity: 0.95;
+        }
+        
+        html,
+        body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            overflow: hidden;
+            font-family: "SarpanchKursiv", sans-serif;
+        }
+        
+        @font-face {
+            font-family: "SarpanchKursiv";
+            src: url("img/sarpanch_variant_kursiv.ttf") format("truetype");
+            font-style: italic;
+            font-weight: normal;
+        }
+        
+        #hud-layer {
+            position: fixed;
+            inset: 0;
+            background: transparent;
+            background-image: url("img/csp-messe.webp");
+            background-size: 2400px 1920px;
+            background-position: center;
+            background-repeat: no-repeat;
+            pointer-events: none;
+        }
+        
+        #hud-layer.is-hidden {
+            display: none;
+        }
+        
+        #root {
+            position: absolute;
+            left: var(--root-left);
+            top: var(--root-top);
+            transform: var(--root-transform);
+            color: white;
+            padding: 18px;
+            width: 500px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        
+        #phase {
+            font-size: 28px;
+            margin-top: 8px;
+        }
+        
+        #time {
+            font-size: 56px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        #hint {
+            font-size: 20px;
+            margin-top: 8px;
+        }
+        
+        #screen-dimmer {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(var(--screen-dim-color), var(--screen-dim-opacity));
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+        
+        #screen-dimmer.is-active {
+            opacity: 1;
+        }
+        
+        .metric {
+            position: absolute;
+            min-width: 250px;
+            color: white;
+            padding: 10px 12px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        
+        #altitude-metric {
+            left: var(--altitude-left);
+            top: var(--altitude-top);
+            transform: var(--altitude-transform);
+        }
+        
+        #speed-metric {
+            left: var(--speed-left);
+            top: var(--speed-top);
+            transform: var(--speed-transform);
+        }
+        
+        .metric-label {
+            font-size: 24px;
+            opacity: 0.8;
+        }
+        
+        .metric-value {
+            font-size: 38px;
+            font-weight: bold;
+            margin-top: 10px;
+            white-space: nowrap;
+        }
+    </style>
 </head>
 
 <body>
-  <div id="screen-dimmer"></div>
-  <div id="root">
-    <div id="phase">Bereit</div>
-    <div id="time">--:--</div>
-    <div id="hint">M = Messe-Modus</div>
-  </div>
+    <div id="hud-layer" class="is-hidden">
+        <div id="screen-dimmer"></div>
+        <div id="root">
+            <div id="phase">READY</div>
+            <div id="time">--:--</div>
+            <div id="hint">EXPO-MODE</div>
+        </div>
 
-  <div id="altitude-metric" class="metric">
-    <div class="metric-label">Höhe</div>
-    <div id="altitude" class="metric-value">--</div>
-  </div>
+        <div id="altitude-metric" class="metric">
+            <div class="metric-label">altitude</div>
+            <div id="altitude" class="metric-value">--</div>
+        </div>
 
-  <div id="speed-metric" class="metric">
-    <div class="metric-label">Geschwindigkeit</div>
-    <div id="speed" class="metric-value">--</div>
-  </div>
+        <div id="speed-metric" class="metric">
+            <div class="metric-label">speed</div>
+            <div id="speed" class="metric-value">--</div>
+        </div>
+    </div>
 
-  <script>
-    window.CosmoScout = window.CosmoScout || {};
-    CosmoScout.messe = CosmoScout.messe || {};
+    <script>
+        window.CosmoScout = window.CosmoScout || {};
+        CosmoScout.messe = CosmoScout.messe || {};
 
-    const FINISHED_DIMMER_DURATION_MS = 20000;
+        const FINISHED_DIMMER_DURATION_MS = 20000;
 
-    let finishedDimmerTimeout = null;
-    let wasFinished = false;
+        let finishedDimmerTimeout = null;
+        let wasFinished = false;
 
-    const lastState = {
-      visible: null,
-      phase: null,
-      remaining: null,
-      hint: null,
-      altitude: null,
-      speed: null
-    };
+        const lastState = {
+            visible: null,
+            phase: null,
+            remaining: null,
+            hint: null,
+            altitude: null,
+            speed: null
+        };
 
-    function setTextIfChanged(id, value, key) {
-      value = value || "";
+        function setTextIfChanged(id, value, key) {
+            value = value || "";
 
-      if (lastState[key] === value) {
-        return;
-      }
+            if (lastState[key] === value) {
+                return;
+            }
 
-      const el = document.getElementById(id);
-      if (!el) {
-        return;
-      }
+            const el = document.getElementById(id);
+            if (!el) {
+                return;
+            }
 
-      el.textContent = value;
-      lastState[key] = value;
-    }
+            el.textContent = value;
+            lastState[key] = value;
+        }
 
-    function triggerFinishedDimmer() {
-      const dimmer = document.getElementById("screen-dimmer");
-      if (!dimmer) {
-        return;
-      }
+        function triggerFinishedDimmer() {
+            const dimmer = document.getElementById("screen-dimmer");
+            if (!dimmer) {
+                return;
+            }
 
-      if (finishedDimmerTimeout !== null) {
-        clearTimeout(finishedDimmerTimeout);
-      }
+            if (finishedDimmerTimeout !== null) {
+                clearTimeout(finishedDimmerTimeout);
+            }
 
-      dimmer.classList.add("is-active");
+            dimmer.classList.add("is-active");
 
-      finishedDimmerTimeout = setTimeout(function () {
-        dimmer.classList.remove("is-active");
-        finishedDimmerTimeout = null;
-      }, FINISHED_DIMMER_DURATION_MS);
-    }
+            finishedDimmerTimeout = setTimeout(function() {
+                dimmer.classList.remove("is-active");
+                finishedDimmerTimeout = null;
+            }, FINISHED_DIMMER_DURATION_MS);
+        }
 
-    CosmoScout.messe.setState = function (state) {
-      if (typeof state === "string") {
-        state = JSON.parse(state);
-      }
+        CosmoScout.messe.setState = function(state) {
+            if (typeof state === "string") {
+                state = JSON.parse(state);
+            }
 
-      const root = document.getElementById("root");
-      if (!root) {
-        return;
-      }
+            const layer = document.getElementById("hud-layer");
+            if (!layer) {
+                return;
+            }
 
-      const visible = !!state.visible;
+            const visible = !!state.visible;
+            if (lastState.visible !== visible) {
+                layer.classList.toggle("is-hidden", !visible);
+                lastState.visible = visible;
+            }
 
-      if (lastState.visible !== visible) {
-        root.style.display = visible ? "" : "none";
-        lastState.visible = visible;
-      }
+            setTextIfChanged("phase", state.phase, "phase");
+            setTextIfChanged("time", state.remaining || "--:--", "remaining");
+            setTextIfChanged("hint", state.hint, "hint");
+            setTextIfChanged("altitude", state.altitude, "altitude");
+            setTextIfChanged("speed", state.speed, "speed");
 
-      setTextIfChanged("phase", state.phase, "phase");
-      setTextIfChanged("time", state.remaining || "--:--", "remaining");
-      setTextIfChanged("hint", state.hint, "hint");
-      setTextIfChanged("altitude", state.altitude, "altitude");
-      setTextIfChanged("speed", state.speed, "speed");
+            const isFinished = state.phaseClass === "finished" || state.phase === "Finished";
 
-      const isFinished = state.phaseClass === "finished" || state.phase === "Beendet";
+            if (isFinished && !wasFinished) {
+                triggerFinishedDimmer();
+            }
 
-      if (isFinished && !wasFinished) {
-        triggerFinishedDimmer();
-      }
-
-      wasFinished = isFinished;
-    };
-  </script>
+            wasFinished = isFinished;
+        };
+    </script>
 </body>
 
 </html>
