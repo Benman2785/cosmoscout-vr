@@ -267,7 +267,7 @@ void Plugin::bindTeleportBookmarkHotkeys() {
   keyboard->BindAction('7', [this]() { handleTeleportBookmarkHotkey(7); });
   keyboard->BindAction('8', [this]() { handleTeleportBookmarkHotkey(8); });
   keyboard->BindAction('9', [this]() { handleTeleportBookmarkHotkey(9); });
-  keyboard->BindAction('c', [this]() { handleTeleportBookmarkHotkey(1); });
+  keyboard->BindAction('g', [this]() { handleTeleportBookmarkHotkey(1); });
   keyboard->BindAction('o', [this]() { handleTeleportBookmarkHotkey(2); });
   keyboard->BindAction('v', [this]() { handleTeleportBookmarkHotkey(3); });
 
@@ -293,7 +293,7 @@ void Plugin::unbindTeleportBookmarkHotkeys(bool restoreTimeHotkeys) {
   keyboard->UnbindAction('7');
   keyboard->UnbindAction('8');
   keyboard->UnbindAction('9');
-  keyboard->UnbindAction('c');
+  keyboard->UnbindAction('g');
   keyboard->UnbindAction('o');
   keyboard->UnbindAction('v');
 
