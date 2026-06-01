@@ -892,7 +892,7 @@
       "maxGPUTilesDEM": 1024,
       "tileResolutionDEM": 128,
       "tileResolutionIMG": 256,
-      "autoLodRange": [25, 75],
+      "autoLodRange": [20, 33],
       "mapCache": "map-cache/",
       "bodies": {
         "Earth": {
