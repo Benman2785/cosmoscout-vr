@@ -85,19 +85,18 @@
       }
     },
     {
-      "name": "Earth",
-      "icon": "earth.png",
+      "name": "Europe",
+      "time": {
+        "start": "2025-06-29T10:00:00.640Z"
+	},
       "location": {
         "center": "Earth",
-        "frame": "IAU_Earth"
-      }
-    },
-    {
-      "name": "Moon",
-      "icon": "moon.png",
-      "location": {
-        "center": "Moon",
-        "frame": "IAU_Moon"
+        "frame": "IAU_Earth",
+        "position": [
+          650049.6197706065,
+          9169440.98335226,
+          8121638.922577351
+        ]
       }
     },
     {
@@ -106,30 +105,6 @@
       "location": {
         "center": "Mars",
         "frame": "IAU_Mars"
-      }
-    },
-    {
-      "name": "Phobos",
-      "icon": "phobos.png",
-      "location": {
-        "center": "Phobos",
-        "frame": "IAU_Phobos"
-      }
-    },
-    {
-      "name": "Ceres",
-      "icon": "ceres.png",
-      "location": {
-        "center": "Ceres",
-        "frame": "IAU_Ceres"
-      }
-    },
-    {
-      "name": "Vesta",
-      "icon": "vesta.png",
-      "location": {
-        "center": "Vesta",
-        "frame": "IAU_Vesta"
       }
     },
     {
@@ -162,6 +137,38 @@
       "location": {
         "center": "Neptune",
         "frame": "IAU_Neptune"
+      }
+    },
+    {
+      "name": "Moon",
+      "icon": "moon.png",
+      "location": {
+        "center": "Moon",
+        "frame": "IAU_Moon"
+      }
+    },
+    {
+      "name": "Phobos",
+      "icon": "phobos.png",
+      "location": {
+        "center": "Phobos",
+        "frame": "IAU_Phobos"
+      }
+    },
+    {
+      "name": "Ceres",
+      "icon": "ceres.png",
+      "location": {
+        "center": "Ceres",
+        "frame": "IAU_Ceres"
+      }
+    },
+    {
+      "name": "Vesta",
+      "icon": "vesta.png",
+      "location": {
+        "center": "Vesta",
+        "frame": "IAU_Vesta"
       }
     },
     {
@@ -1004,15 +1011,16 @@
     "csp-messe": {
       "showHudInIdle": true,
       "autoStartAfterWarmup": true,
-      "warmupSeconds": 30.0,
-      "addThresholdSeconds": 90.0,
-      "hudGifPath": "../share/resources/gui/img/csp-messe.gif",
-      "hudWidth": 2500,
-      "hudHeight": 1920,
+      "warmupSeconds": 0.01,
+      "addThresholdSeconds": 45.0,
+      "hudGifPath": "../share/resources/gui/img/csp-messe.webp",
+      "hudWidth": 4800,
+      "hudHeight": 2500,
       "hudDistanceMeters": 3.0,
-      "hudVerticalOffsetMeters": -0.33,
-      "hudScale": 1.00,
-      "ignoreDepth": true
+      "hudVerticalOffsetMeters": 1.25,
+      "hudScale": 2.50,
+      "heightScale": 3.0,
+      "ignoreDepth": false
     },
     "csp-rings": {
       "rings": {

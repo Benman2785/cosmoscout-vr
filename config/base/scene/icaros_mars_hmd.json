@@ -68,6 +68,96 @@
       }
     },
     {
+      "name": "Gale Crater",
+      "time": {
+        "start": "2025-12-19T12:39:22.640Z"
+      },
+      "location": {
+        "center": "Mars",
+        "frame": "IAU_Mars",
+        "position": [
+          2311805.9100406,
+          -883498.9869260,
+          -2610896.869622
+        ],
+        "rotation": [
+          -0.27933641,
+          -0.57523190,
+          0.737212344,
+          -0.21816822
+        ]
+      }
+    },
+    {
+      "name": "Olympus Mons",
+      "time": {
+        "start": "2025-12-19T09:39:22.640Z"
+      },
+      "location": {
+        "center": "Mars",
+        "frame": "IAU_Mars",
+        "position": [
+          -1716945.688961,
+          1427174.4939205,
+          -2624507.309137
+        ],
+        "rotation": [
+          -0.53904605,
+          0.570239929,
+          -0.08314103,
+          0.614282785
+        ]
+      }
+    },
+    {
+      "name": "Valles Marineris",
+      "time": {
+        "start": "2025-12-19T06:39:22.640Z"
+      },
+      "location": {
+        "center": "Mars",
+        "frame": "IAU_Mars",
+        "position": [
+          -3432945.958460,
+          -448131.4549137,
+          -560418.4201091
+        ],
+        "rotation": [
+          0.75023966,
+          -0.65584392,
+          0.032858628,
+          -0.07706847
+        ]
+      }
+    },
+    {
+      "name": "Curiosity Landing",
+      "description": "Landing of the Rover for the Mars Science Laboratory.",
+      "color": [
+        0.9,
+        0.7,
+        0.3
+      ],
+      "time": {
+        "start": "2012-08-06 05:31:00"
+      },
+      "location": {
+        "center": "Mars",
+        "frame": "IAU_Mars",
+        "position": [
+          2355817.1503860787,
+          -717233.1853627029,
+          -2744165.4025669894
+        ],
+        "rotation": [
+          0.29703477878551815,
+          0.7983366317584811,
+          -0.46250011374371464,
+          0.24601342925013817
+        ]
+      }
+    },
+    {
       "name": "Mercury",
       "icon": "mercury.png",
       "location": {
@@ -84,19 +174,18 @@
       }
     },
     {
-      "name": "Earth",
-      "icon": "earth.png",
+      "name": "Europe",
+      "time": {
+        "start": "2025-06-29T10:00:00.640Z"
+	},
       "location": {
         "center": "Earth",
-        "frame": "IAU_Earth"
-      }
-    },
-    {
-      "name": "Moon",
-      "icon": "moon.png",
-      "location": {
-        "center": "Moon",
-        "frame": "IAU_Moon"
+        "frame": "IAU_Earth",
+        "position": [
+          650049.6197706065,
+          9169440.98335226,
+          8121638.922577351
+        ]
       }
     },
     {
@@ -105,30 +194,6 @@
       "location": {
         "center": "Mars",
         "frame": "IAU_Mars"
-      }
-    },
-    {
-      "name": "Phobos",
-      "icon": "phobos.png",
-      "location": {
-        "center": "Phobos",
-        "frame": "IAU_Phobos"
-      }
-    },
-    {
-      "name": "Ceres",
-      "icon": "ceres.png",
-      "location": {
-        "center": "Ceres",
-        "frame": "IAU_Ceres"
-      }
-    },
-    {
-      "name": "Vesta",
-      "icon": "vesta.png",
-      "location": {
-        "center": "Vesta",
-        "frame": "IAU_Vesta"
       }
     },
     {
@@ -161,6 +226,38 @@
       "location": {
         "center": "Neptune",
         "frame": "IAU_Neptune"
+      }
+    },
+    {
+      "name": "Moon",
+      "icon": "moon.png",
+      "location": {
+        "center": "Moon",
+        "frame": "IAU_Moon"
+      }
+    },
+    {
+      "name": "Phobos",
+      "icon": "phobos.png",
+      "location": {
+        "center": "Phobos",
+        "frame": "IAU_Phobos"
+      }
+    },
+    {
+      "name": "Ceres",
+      "icon": "ceres.png",
+      "location": {
+        "center": "Ceres",
+        "frame": "IAU_Ceres"
+      }
+    },
+    {
+      "name": "Vesta",
+      "icon": "vesta.png",
+      "location": {
+        "center": "Vesta",
+        "frame": "IAU_Vesta"
       }
     },
     {
@@ -795,7 +892,7 @@
       "maxGPUTilesDEM": 1024,
       "tileResolutionDEM": 128,
       "tileResolutionIMG": 256,
-      "autoLodRange": [25, 40],
+      "autoLodRange": [25, 75],
       "mapCache": "map-cache/",
       "bodies": {
         "Earth": {
@@ -839,7 +936,7 @@
             "ETOPO1": {
               "copyright": "NOAA",
               "url": "http://localhost:8080/cgi-bin/mapserv?map=/mapserver-datasets/meta.map&service=wms",
-              "layers": "mars.etopo1.dem",
+              "layers": "mars.etopo1.dem,11e1,11e2,11e3,11e4,11w1,11w2,11w2,11w3,11w4,13e1,13e2,13e3,13e4,20e1,20e2,20e3,20e4,20w1,20w2,20w3,20w4",
               "maxLevel": 6
             }
           }
@@ -1003,15 +1100,16 @@
     "csp-messe": {
       "showHudInIdle": true,
       "autoStartAfterWarmup": true,
-      "warmupSeconds": 10.0,
-      "addThresholdSeconds": 15.0,
-      "hudGifPath": "../share/resources/gui/img/csp-messe.gif",
-      "hudWidth": 7500,
-      "hudHeight": 5760,
+      "warmupSeconds": 0.01,
+      "addThresholdSeconds": 45.0,
+      "hudGifPath": "../share/resources/gui/img/csp-messe.webp",
+      "hudWidth": 4800,
+      "hudHeight": 2500,
       "hudDistanceMeters": 3.0,
-      "hudVerticalOffsetMeters": -0.33,
-      "hudScale": 1.00,
-      "ignoreDepth": true
+      "hudVerticalOffsetMeters": 1.25,
+      "hudScale": 2.50,
+      "heightScale": 3.0,
+      "ignoreDepth": false
     },
     "csp-rings": {
       "rings": {

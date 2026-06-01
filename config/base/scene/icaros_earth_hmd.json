@@ -1003,15 +1003,16 @@
     "csp-messe": {
       "showHudInIdle": true,
       "autoStartAfterWarmup": true,
-      "warmupSeconds": 30.0,
-      "addThresholdSeconds": 90.0,
-      "hudGifPath": "../share/resources/gui/img/csp-messe.gif",
-      "hudWidth": 2500,
-      "hudHeight": 1920,
+      "warmupSeconds": 0.01,
+      "addThresholdSeconds": 45.0,
+      "hudGifPath": "../share/resources/gui/img/csp-messe.webp",
+      "hudWidth": 4800,
+      "hudHeight": 2500,
       "hudDistanceMeters": 3.0,
-      "hudVerticalOffsetMeters": -0.33,
-      "hudScale": 1.00,
-      "ignoreDepth": true
+      "hudVerticalOffsetMeters": 1.25,
+      "hudScale": 2.50,
+      "heightScale": 3.0,
+      "ignoreDepth": false
     },
     "csp-rings": {
       "rings": {
@@ -1639,7 +1640,7 @@
     "csp-vr-accessibility": {
       "viewOffset": {
         "enabled": true,
-        "pitch": 0.0
+        "pitch": -2.0
       },
       "motionPoints": {
         "enabled": false,
@@ -1659,7 +1660,7 @@
       },
       "crosshair": {
         "enabled": true,
-        "size": 1,
+        "size": 0.5,
         "offset": 0,
         "extent": 10.0,
         "texture": "../share/resources/textures/CrosshairLarge.png",
